@@ -1,0 +1,43 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - contextcheck
+    - cyclop
+    - errorlint
+    - exhaustive
+    - funlen
+    - gocognit
+    - gocritic
+    - maintidx
+    - misspell
+    - nilerr
+    - noctx
+    - unconvert
+    - wastedassign
+
+  settings:
+    cyclop:
+      max-complexity: 12
+    funlen:
+      lines: 60
+      statements: 35
+    gocognit:
+      min-complexity: 15
+    maintidx:
+      under: 20
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+issues:
+  max-same-issues: 0
+  max-issues-per-linter: 0

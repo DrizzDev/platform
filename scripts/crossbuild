@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+output="$(mktemp -d "${TMPDIR:-/tmp}/drizz-crossbuild.XXXXXX")"
+
+cleanup() {
+  rm -rf "${output}"
+}
+
+trap cleanup EXIT
+cd "${root}"
+
+targets=(
+  "linux/amd64"
+  "linux/arm64"
+  "darwin/amd64"
+  "darwin/arm64"
+  "windows/amd64"
+  "windows/arm64"
+)
+
+for target in "${targets[@]}"; do
+  goos="${target%/*}"
+  goarch="${target#*/}"
+  echo "crossbuild: ${goos}/${goarch}"
+  CGO_ENABLED=0 GOOS="${goos}" GOARCH="${goarch}" go build -trimpath -o "${output}/drizz-${goos}-${goarch}" ./command/drizz
+done
+
+echo "crossbuild: all targets built"

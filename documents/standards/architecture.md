@@ -115,3 +115,17 @@ Status: Approved and mandatory
 - `ARC-038`: A corrective refactor SHOULD precede new behavior when the touched
   boundary already violates these standards. The refactor MUST remain scoped
   and behavior-preserving.
+
+## Go ownership
+
+- `ARC-039`: Go package co-location does not waive separation of concerns. A
+  source file contains one primary concept and only implementation inseparable
+  from that concept. Contracts, errors, configuration, lifecycle,
+  orchestration, persistence, provider integration, transport behavior,
+  validation, and observability MUST use separate files or narrower packages
+  when they can change independently.
+- `ARC-040`: Structure is owner-first and layer-second. Global directories for
+  constants, schemas, models, repositories, or services are prohibited.
+  Constants remain with their semantic owner, boundary models with their
+  boundary, persistence ports with their use cases, and implementations with
+  their adapter or infrastructure owner.
