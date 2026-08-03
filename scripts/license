@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+inventory="$(mktemp "${TMPDIR:-/tmp}/drizz-license.XXXXXX")"
+
+cleanup() {
+  rm -f "${inventory}"
+}
+
+trap cleanup EXIT
+cd "${root}"
+
+go list -deps -test -f '{{with .Module}}{{if not .Main}}{{.Path}}|{{.Dir}}{{end}}{{end}}' ./... \
+  | LC_ALL=C sort -u > "${inventory}"
+
+while IFS='|' read -r module directory; do
+  if [[ -z "${module}" ]]; then
+    continue
+  fi
+  if [[ -z "${directory}" ]]; then
+    echo "license: module directory is unavailable for ${module}" >&2
+    exit 1
+  fi
+  license="$(find "${directory}" -maxdepth 1 -type f \( -iname 'license*' -o -iname 'licence*' -o -iname 'copying*' \) -print -quit)"
+  if [[ -z "${license}" ]]; then
+    echo "license: no license file found for ${module}" >&2
+    exit 1
+  fi
+  if grep -Eiq 'Apache License|Permission is hereby granted, free of charge|Redistribution and use in source and binary forms|Permission to use, copy, modify, and/or distribute this software|dual-licensed under the Unlicense and MIT' "${license}"; then
+    continue
+  fi
+  echo "license: unapproved runtime license for ${module}: ${license}" >&2
+  exit 1
+done < "${inventory}"
+
+echo "license: approved"

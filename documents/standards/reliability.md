@@ -75,15 +75,15 @@ Status: Approved and mandatory
   Recovery specifies verified rollback or a documented forward-only
   application and data recovery procedure.
 - `REL-027`: Rollback MUST preserve data even when schema rollback is unsafe.
-- `REL-031`: API, wire protocol, payload schema, persistence schema, policy,
+- `REL-028`: API, wire protocol, payload schema, persistence schema, policy,
   provider, and artifact protocol versions evolve independently and MUST NOT be
   collapsed into one application version.
 
 ## Performance
 
-- `REL-028`: Every material operation MUST declare latency class, resource
+- `REL-029`: Every material operation MUST declare latency class, resource
   bounds, concurrency, deadline, and retry budget.
-- `REL-029`: Hot paths MUST be identified by measurement. Avoid unnecessary
+- `REL-030`: Hot paths MUST be identified by measurement. Avoid unnecessary
   allocation, copying, repeated work, and quadratic behavior.
-- `REL-030`: Optimization MUST be supported by a reproducible benchmark or
+- `REL-031`: Optimization MUST be supported by a reproducible benchmark or
   profile and checked for regression.

@@ -22,6 +22,10 @@ change.
 
 ## 2. Design before editing
 
+- Complete the design inventory required by
+  [the agent protocol](documents/standards/agent.md) before each implementation
+  slice. Do not begin a slice with an unresolved owner, boundary, dependency,
+  state, failure, file, test, or verification decision.
 - Apply SOLID, separation of concerns, high cohesion, low coupling, dependency
   inversion, and composition over inheritance wherever applicable.
 - Use object-oriented design through cohesive Go types and methods where
@@ -29,16 +33,22 @@ change.
 - Use a design pattern only when it solves a named current problem.
 - Preserve the repository's layered dependency direction.
 - Give every module and type one clear responsibility.
-- Use strict single-word names. Represent multiword concepts through meaningful
+- Use strict single-word names. Represent multi-word concepts through meaningful
   nesting.
 - Follow normal Go visibility naming for identifiers.
 - Use `UPPER_SNAKE_CASE` only for internal semantic string values.
 - Preserve values defined by an external protocol or public contract.
 - Keep public surfaces minimal and validate input at boundaries.
+- Go has no keyword arguments. Use one typed input or options struct with keyed
+  fields whenever a project-owned call needs multiple values; keep
+  `context.Context` first when applicable.
 - Do not introduce a dependency, abstraction, interface, or framework without a
   demonstrated requirement.
 - Record a material, durable architecture decision only after its owner has
   reviewed it.
+- Treat each implementation slice as a fresh repository review. Re-read the
+  applicable standards and owning code instead of relying on conversation
+  memory.
 
 Before choosing a concrete design, answer:
 
@@ -76,7 +86,8 @@ The answers may justify a concrete type. They may not be skipped.
 2. run every available repository check required by the changed area;
 3. test real integrations when the result depends on real provider behavior;
 4. inspect the fresh complete diff and working-tree status;
-5. distinguish scoped checks from repository-wide checks.
+5. review the diff against the completed design inventory;
+6. distinguish scoped checks from repository-wide checks.
 
 Never label a failure as pre-existing, flaky, or unrelated without reproduction
 and baseline evidence. A required check that does not yet exist must be reported

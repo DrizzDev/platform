@@ -43,7 +43,8 @@ to production only after its required proof passes.
 | Runtime | Go 1.26.x | Build, startup, shutdown, process supervision, and supported-platform cross-compilation |
 | MCP | Official `modelcontextprotocol/go-sdk` | Standard-input/output connection with Claude, Codex, and a generic MCP client |
 | CLI | Cobra | Nested command UX, completion, stable machine output, cancellation, and binary impact |
-| Logging | `log/slog` | Structured standard-error output with redaction and MCP standard-output isolation |
+| Logging | `log/slog` | Line-delimited JSON, stable fields, explicit correlation scope, redaction, and MCP standard-output isolation |
+| Error reporting | Sentry Go SDK with the `slog-sentry` handler | Error routing, exception conversion, source frames, redaction, asynchronous delivery, and bounded shutdown |
 | Configuration | Typed Go structures with a small explicit loader | Precedence, unknown-key rejection, secret exclusion, and deterministic tests |
 | Construction | Manual constructors | Clear lifecycle, no circular dependencies, and test replacement at real boundaries |
 | Authentication primitives | `golang.org/x/oauth2` where compatible | Compatibility with the existing Drizz identity service and native-app flow |
@@ -53,6 +54,52 @@ to production only after its required proof passes.
 The official MCP documentation currently lists the Go SDK as Tier 1. Its exact
 release and supported protocol versions must be pinned and tested when the proof
 is built.
+
+### Logging
+
+Use the standard `log/slog` API and JSON handler. The official MCP Go SDK
+accepts `*slog.Logger` directly, so another logging API would require an adapter
+and create two logging contracts. `slog` already provides structured
+attributes, context-aware calls, immutable logger enrichment, stable handler
+interfaces, and line-delimited JSON.
+
+Use `HandlerOptions.ReplaceAttr` for the Drizz redaction and field policy. Do
+not add a redaction package until it demonstrates stable maintenance, precise
+control of Drizz fields, and a clear benefit over this standard-library
+extension point. Reconsider Zerolog or Zap only if production measurements show
+logging is a material CPU or allocation bottleneck.
+
+The composition root constructs observability once per process and injects the
+same providers into CLI, MCP, server, desktop, and background flows. No feature
+creates its own logger, reporter, tracer, or meter.
+
+Sentry uses `github.com/getsentry/sentry-go` v0.48.0 behind the reporting sink
+boundary. `github.com/samber/slog-sentry/v2` v2.11.0 converts `slog` error
+records into Sentry events and recognizes a Go `error` under the `error` key.
+The official `github.com/getsentry/sentry-go/otel` integration correlates those
+events with the active OpenTelemetry span. Both adapters remain replaceable;
+another reporting vendor implements the same sink and is registered once in
+the reporting provider. Logging callers and transports do not change.
+
+Sentry's official `slog` adapter was evaluated at the same version. It emits
+Sentry log records and converts a Go `error` to text rather than an exception
+event. It is not selected because Drizz requires the original error chain and
+exception event while Sentry-native log collection remains disabled.
+
+Sentry is disabled when `DRIZZ_SENTRY_DSN` is absent. `DRIZZ_SENTRY_SAMPLE_RATE`
+controls error-event sampling and defaults to `1`. Every Drizz-owned setting uses
+the `DRIZZ_` prefix so inherited third-party `SENTRY_*` or `OTEL_*` variables
+never change Drizz behavior. The adapter receives only `ERROR` and
+higher records, limits breadcrumbs and error-chain depth, and flushes once
+during bounded shutdown. Automatic collection of user data, cookies, headers,
+HTTP bodies, query parameters, machine identity, Sentry-native logs, and
+Sentry-native metrics is explicitly disabled. OpenTelemetry remains the single
+owner of traces, spans, and metrics; Sentry-native tracing is disabled.
+
+The selected Sentry Go SDK does not expose a native profile-sampling option.
+Profiling is therefore deferred until a supported mechanism, destination,
+sampling budget, runtime cost, and privacy contract are proven. It MUST NOT be
+silently enabled through a future dependency update.
 
 ## 4. Decisions that require product or architecture evidence
 
@@ -89,9 +136,10 @@ generic job or scheduler framework is selected.
 
 ### Observability
 
-Use structured logs from the beginning. Add OpenTelemetry only after trace or
-metric export requirements, privacy policy, and destination are known. Domain
-and application behavior must not depend on a telemetry vendor.
+Use structured logs and OpenTelemetry interfaces from the beginning. Export is
+disabled by default and is enabled only when its destination and privacy policy
+are configured. Domain and application behavior must not depend on a telemetry
+vendor.
 
 ### Packaging
 

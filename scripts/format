@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "${root}"
+
+files="$(go tool goimports -l .)"
+if [[ -n "${files}" ]]; then
+  echo "format: run 'make fix' for:" >&2
+  echo "${files}" >&2
+  exit 1
+fi

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+temporary="$(mktemp -d "${TMPDIR:-/tmp}/drizz-smoke.XXXXXX")"
+
+cleanup() {
+  rm -rf "${temporary}"
+}
+
+trap cleanup EXIT
+cd "${root}"
+
+go build -trimpath -o "${temporary}/drizz" ./command/drizz
+output="$("${temporary}/drizz" version)"
+if [[ "${output}" != drizz* ]]; then
+  echo "smoke: unexpected version output: ${output}" >&2
+  exit 1
+fi
+
+echo "smoke: passed"

@@ -38,7 +38,7 @@ Status: Approved and mandatory
 - `GO-015`: Export does not automatically require a comment. Add concise Go
   documentation only for a public external contract or a technical abstraction
   that is not clear from its name and type. Follow the three-line hard limit in
-  `STYLE-034`.
+  `STYLE-032`.
 - `GO-016`: Same-package tests are reserved for necessary unexported invariants.
   Do not export production internals solely for tests.
 - `GO-017`: Use raw SQL only inside persistence adapters and test its semantics.
@@ -49,6 +49,13 @@ Status: Approved and mandatory
   intact and MUST NOT be swallowed or converted into an unrelated failure.
 - `GO-020`: Every project-owned `.go` file, including tests and generated
   project code, MUST contain no more than 500 physical lines.
+- `GO-021`: Go has no keyword or named call arguments. A project-owned call
+  that needs multiple business, configuration, or same-typed values MUST accept
+  one explicit typed input or options struct, and callers MUST use keyed struct
+  literals. Positional parameters are limited to a receiver, `context.Context`
+  first plus one typed input, an unambiguous single value, or a signature
+  required by Go or an external interface. Changing field declaration order
+  MUST NOT change call behavior.
 
 ## Owner-convention mapping
 
@@ -59,12 +66,13 @@ Status: Approved and mandatory
   structs with validated constructors and narrow methods.
 - Internal implementation details use unexported Go identifiers and narrow
   package boundaries.
-- Typed parameter structs replace keyword-call requirements when argument
-  meaning is not immediately obvious.
+- Typed input and options structs are Go's mandatory replacement for keyword
+  arguments. Callers use keyed fields even when the current declaration order
+  appears obvious.
 - Public methods orchestrate private steps and follow the line targets in
   `STYLE-024`.
 - Test functions required by Go are framework adapters; their organization
   mirrors the production type or use case and covers concrete production,
   failure, and recovery behavior.
-- A typed parameter struct is required when several arguments would otherwise
-  be ambiguous or easy to transpose.
+- A project-owned call MUST NOT rely on the positional ordering of multiple
+  business, configuration, identifier, string, numeric, or boolean values.

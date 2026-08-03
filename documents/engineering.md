@@ -36,6 +36,7 @@ Every implementation applies:
 - separation of concerns;
 - high cohesion and low coupling;
 - strongly typed contracts at every boundary;
+- typed input or options structs with keyed Go literals instead of order-dependent multi-value calls;
 - design patterns only for a named current problem;
 - explicit evaluation of future substitution and module extraction;
 - a hard maximum of 500 physical lines for every project-owned Go source file.

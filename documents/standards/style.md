@@ -22,10 +22,18 @@ style.
 - `STYLE-005`: Every project-owned source filename MUST have one complete
   semantic word as its base name. Language-required suffixes such as `_test.go`,
   operating-system build suffixes, generated filenames, `README.md`, `go.mod`,
-  and migration identifiers are explicit exceptions.
+  and migration identifiers are explicit exceptions. Externally mandated
+  directories such as GitHub's `PULL_REQUEST_TEMPLATE` are allowed only at the
+  required integration boundary; files inside them still follow this rule.
 - `STYLE-006`: A file contains one primary responsibility. A primary type and
-  its tightly bound private implementation may share one file.
-- `STYLE-007`: Tests MUST mirror the production module and directory structure.
+  only its inseparable private implementation may share one file. Code that can
+  change for a different contract, lifecycle, provider, validation,
+  observability, or orchestration reason belongs in another file or package.
+- `STYLE-007`: Unit tests remain beside the owning Go package and normally use
+  an external test package. Same-package test support is limited by `GO-016`.
+  Cross-package architecture, contract, integration, and system tests live
+  under `tests` and mirror the product owner or boundary they verify.
+
 ## Names
 
 - `STYLE-008`: Every project-owned identifier MUST use one precise domain word
@@ -105,19 +113,19 @@ style.
 - `STYLE-031`: A code comment MUST be short, crisp, technically
   precise, and well written. It MUST NOT narrate code, repeat a name, contain
   filler, or explain an obvious implementation.
-- `STYLE-034`: A code comment SHOULD be one line and MUST NOT
+- `STYLE-032`: A code comment SHOULD be one line and MUST NOT
   exceed three short lines. Longer explanation belongs in an ADR, design
   document, contract document, or test.
-- `STYLE-035`: Do not add comments merely because a type, function, method,
+- `STYLE-033`: Do not add comments merely because a type, function, method,
   field, or package is exported. Prefer a precise name and small responsibility.
   Public external contracts may require concise generated-documentation text.
 
 ## Tests
 
-- `STYLE-032`: Tests MUST cover concrete production behavior, edge cases,
+- `STYLE-034`: Tests MUST cover concrete production behavior, edge cases,
   failure, and recovery. Vague, random, or artificially convenient cases are
   prohibited.
-- `STYLE-033`: Test grouping follows the production type or use case. Languages
+- `STYLE-035`: Test grouping follows the production type or use case. Languages
   that require function entry points may use them only as the test framework
   adapter around clearly grouped behavior.
 
@@ -127,3 +135,12 @@ style.
   project code, MUST NOT exceed 500 physical lines. Approaching 500 lines
   requires a responsibility and cohesion review; splitting MUST follow ownership
   rather than arbitrary line ranges.
+
+## Readability
+
+- `STYLE-037`: Long boolean chains and repeated conditional branches that
+  encode a set or policy are prohibited. Use a switch, typed set, table, or
+  cohesive policy object chosen for clarity and measured cost.
+- `STYLE-038`: Example, fixture, and test identifiers MUST use the complete
+  domain word. Use `session_123`, `request_123`, and `organization_123`;
+  shortened `ses`, `req`, and `org` prefixes are prohibited.
