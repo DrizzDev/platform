@@ -42,8 +42,10 @@ it.
   preserve safe context and internal causes without string matching.
 - `CODE-017`: Errors exposed across trust boundaries MUST NOT include secrets,
   content, stack traces, SQL, internal paths, or provider internals.
-- `CODE-018`: Panic or fatal termination is reserved for unrecoverable startup
-  programmer/configuration failure at the composition root.
+- `CODE-018`: Panic or fatal termination is reserved for impossible
+  programmer-created composition states at the composition root. Invalid user,
+  deployment, or provider configuration is a normal startup error under
+  `CODE-027`.
 - `CODE-019`: Resources MUST have a guaranteed release path.
 - `CODE-020`: Reuse existing correct code; refactor recoverable code; rewrite
   only when evidence shows the structure is fundamentally unsuitable.

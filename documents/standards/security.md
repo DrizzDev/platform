@@ -56,3 +56,30 @@ Status: Approved and mandatory
 - `SEC-022`: Protocol boundaries MUST declare and enforce limits for encoded and
   decoded body size, string and collection length, nesting, pagination,
   decompression ratio, execution time, concurrency, and output.
+- `SEC-023`: Public native clients MUST use Authorization Code with PKCE and
+  MUST NOT contain or depend on a client secret. Implicit and password grants
+  are prohibited.
+- `SEC-024`: Device Authorization MAY be used only for a user-present headless
+  journey. Polling MUST honor the server interval, expiry, cancellation, and
+  slowdown response.
+- `SEC-025`: Local stdio MCP MUST NOT run the HTTP MCP authorization protocol or
+  expose credentials through MCP messages, model context, process arguments,
+  environment variables, or ordinary files. It MUST use the application-owned
+  identity boundary and approved credential store.
+- `SEC-026`: HTTP MCP authorization MUST implement current MCP discovery,
+  resource binding, token audience validation, TLS, and authorization error
+  behavior. Token passthrough is prohibited.
+- `SEC-027`: Human credentials and refresh tokens MUST NOT authenticate CI or
+  autonomous workloads. Workload federation is preferred; every machine-client
+  fallback MUST have an isolated identity, least privilege, rotation, and
+  revocation.
+- `SEC-028`: Auth0 tenant, Action, connection, grant, registration, or default
+  permission changes MUST be assessed and regression-tested for every affected
+  existing Drizz application. New Platform authentication MUST remain additive.
+- `SEC-029`: Organization and resource authorization MUST use current trusted
+  cloud state. Token claims and local selections may identify requested context
+  but MUST NOT be the final authority.
+- `SEC-030`: An access token MUST be accepted only by its intended audience.
+  Passing a Platform token to another resource is prohibited; downstream access
+  MUST use an independently authorized service identity or token exchange bound
+  to that downstream resource.

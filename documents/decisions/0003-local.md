@@ -13,7 +13,7 @@ history and must protect organization data.
 ## Decision
 
 Execute device work and selected deterministic authoring locally. Record
-durable local facts and synchronize them asynchronously. Keep Drizz cloud
+durable local facts and synchronize them asynchronously. Keep Drizz Cloud
 authoritative for organization membership, permissions, cloud resources, and
 cross-surface history.
 
