@@ -1,6 +1,6 @@
 # Dependencies
 
-Status: Approved foundation baseline.
+Status: Approved foundation baseline
 
 This record captures the `DEL-002` evidence for direct runtime dependencies. It
 is a living record, not a compliance certificate. Mechanically enforced fields:
@@ -20,10 +20,10 @@ produces a ~25 MiB binary (trimmed, not linker-stripped). Release stripping
 
 | Module | Version | Purpose | License | Upstream / maintenance | Replacement boundary |
 | --- | --- | --- | --- | --- | --- |
-| `github.com/modelcontextprotocol/go-sdk` | v1.7.0 | Official MCP server protocol | MIT / Apache-2.0 transition | Anthropic + MCP org; active | `internal/transport/mcp` |
+| `github.com/modelcontextprotocol/go-sdk` | v1.7.0 | Official MCP server protocol | MIT / Apache-2.0 transition | MCP project with Google; active | `internal/transport/mcp` |
 | `github.com/spf13/cobra` | v1.10.2 | CLI command routing | Apache-2.0 | spf13; active, widely adopted | `internal/transport/cli` |
 | `github.com/getsentry/sentry-go` (+ `/otel`) | v0.48.0 | Error reporting sink; OTel span correlation | MIT | Sentry; active, vendor-maintained | `internal/platform/reporting/sentry` |
-| `github.com/samber/slog-sentry/v2` | v2.11.0 | Bridge `slog` error records to the Sentry sink | MIT | samber; active | `internal/platform/reporting/sentry` |
+| `github.com/samber/slog-sentry/v2` | v2.11.0 | Deliver approved error-level records to the Sentry sink | MIT | samber; active | `internal/platform/reporting/sentry` |
 | `go.opentelemetry.io/otel` (+ `sdk`, `metric`, `trace`, OTLP exporters) | v1.44.0 | Traces and metrics with OTLP export | Apache-2.0 | CNCF OpenTelemetry; active | `internal/platform/telemetry` |
 
 Transitive dependencies are pinned by `go.sum`; their licenses are verified for

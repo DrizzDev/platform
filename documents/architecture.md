@@ -22,6 +22,9 @@ and synchronizes required data with Drizz services.
 - Drizz services remain authoritative for cloud data and organization access.
 - Local work must be recorded and synchronized without making every device
   action wait for a cloud round trip.
+- Primary agent applications must use their official MCP, plugin, hook, and
+  structured-event surfaces without requiring a developer SDK or Python
+  runtime.
 - Public tool names and schemas are not yet approved.
 
 ## 3. System context
@@ -167,6 +170,10 @@ For a local standard-input/output integration, the MCP client starts
 process lifecycle. Drizz writes protocol messages to standard output and
 diagnostics to standard error.
 
+The local stdio process reuses the installed user's Drizz session through the
+shared identity service. It does not perform the HTTP MCP OAuth flow and does
+not expose credentials to the MCP client or model.
+
 ### CLI
 
 `drizz <command>` starts a normal command-line process, invokes the same
@@ -181,11 +188,35 @@ desktop must not reimplement capabilities.
 
 ### Remote interfaces
 
-A remote MCP or HTTP deployment is a separate product mode. It has different
-authentication, authorization, availability, and local-device constraints and
-is not implied by the local design.
+A remote HTTP MCP deployment is a separate product mode. It follows the MCP
+OAuth 2.1 authorization specification and cannot directly reach a device on the
+user's computer. A future local-device relay requires its own approved design.
 
-## 8. Candidate product modules
+## 8. Agent integration and capture
+
+Claude, Codex, and other supported external agents continue to own the model
+conversation and planning loop. Drizz combines two observable sources:
+
+- host events supplied through official hooks, plugins, transcripts, or
+  structured event streams; and
+- authoritative capability events recorded inside the shared Drizz application
+  core.
+
+Host-specific adapters validate and normalize their external formats into one
+Drizz-owned capture contract. MCP requests alone provide tool execution context,
+not the complete host conversation. A surface without approved lifecycle events
+is supported with explicitly reduced capture fidelity.
+
+OpenInference is not required for external agent CLI or desktop integrations
+and is not part of the first-release runtime. A future SDK-based integration may
+accept or export OpenInference only through a replaceable outer adapter. The
+canonical product record remains the Drizz execution record.
+
+The complete contract, privacy scope, supported surfaces, implementation order,
+and verification matrix are defined in
+[Agent Integration and Execution Capture](capture.md).
+
+## 9. Candidate product modules
 
 These are candidate ownership boundaries, not approved public tools or a
 required folder tree.
@@ -195,6 +226,8 @@ required folder tree.
 | Identity | Local sign-in lifecycle and authenticated context |
 | Device | Device discovery, connection, observation, and actions |
 | Execution | Operation lifecycle, cancellation, and outcome |
+| Capture | Typed agent and capability event normalization, fidelity, and correlation |
+| Integration | Supported agent detection, plugin lifecycle, and compatibility |
 | Artifact | Local artifact identity, integrity, and retention state |
 | Sync | Durable transfer, retry, resume, and reconciliation |
 | Authoring | Approved deterministic authoring behavior |
@@ -202,7 +235,7 @@ required folder tree.
 Test plan, debugging, application, and report modules should be designed when
 their product requirements and existing cloud contracts are inspected.
 
-## 9. Local records and synchronization
+## 10. Local records and synchronization
 
 The requirements are:
 
@@ -218,10 +251,21 @@ direction. Its driver, schema, locking, crash, migration, multi-process,
 cleanup, and supported-operating-system behavior must be proven before the
 implementation is accepted.
 
-## 10. Security boundaries
+The final Stage 3 authentication plan defines a separate identity coordination
+database for non-secret session epochs, credential pointers, fenced
+publication, and durable cleanup. Its implementation remains gated by the
+required dependency and platform proofs. It does not decide the later
+execution, synchronization, or artifact persistence schema.
 
-- Native sign-in should use the system browser and PKCE if supported by the
-  current Drizz identity service.
+## 11. Security boundaries
+
+- Native sign-in uses Authorization Code with PKCE in the system browser.
+- Device Authorization is the explicit fallback for headless terminals.
+- Local MCP reuses the installed session without receiving its credentials.
+- Agent plugins and hooks contain no Drizz credential and cannot change the
+  user's existing agent authentication.
+- CI uses workload identity federation where available and an isolated machine
+  client otherwise; it never uses a human refresh token.
 - Credentials belong in the operating-system credential store.
 - The cloud rechecks authorization for every cloud resource.
 - Interface input cannot supply trusted user or organization identity.
@@ -232,20 +276,25 @@ implementation is accepted.
 - Local files must remain within approved Drizz-owned locations unless the user
   explicitly grants another path.
 
-These requirements do not define the final authentication contract. That
-requires an audit of the existing Drizz identity and authorization flow.
+The complete contract is defined in
+[Authentication and Authorization](authentication.md). Its Stage 3 delivery is
+defined in the
+[Authentication Implementation Plan](plans/authentication.md).
 
-## 11. Open decisions
+## 12. Open decisions
 
 - approved first capability set and public vocabulary;
-- current authentication endpoints, token model, scopes, and organization
-  context;
 - desktop process and update lifecycle;
 - device integration boundary for Android and iOS;
 - which deterministic authoring behavior may be distributed locally;
-- local persistence and cleanup design;
+- execution, synchronization, and artifact SQLite schema, concurrency,
+  migration, and cleanup design; identity coordination is owned separately by
+  the Stage 3 authentication plan;
 - synchronization contract with existing Drizz services;
 - supported operating systems and installation channels;
-- whether any remote MCP or HTTP mode is a product requirement.
+- exact supported versions and capture capability matrix for each agent
+  application surface;
+- when a remote HTTP MCP endpoint and local-device relay become product
+  requirements.
 
 No open decision in this section should be treated as an implementation choice.

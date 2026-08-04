@@ -22,7 +22,7 @@ style.
 - `STYLE-005`: Every project-owned source filename MUST have one complete
   semantic word as its base name. Language-required suffixes such as `_test.go`,
   operating-system build suffixes, generated filenames, `README.md`, `go.mod`,
-  and migration identifiers are explicit exceptions. Externally mandated
+  migration identifiers, and ADR number-title filenames are explicit exceptions. Externally mandated
   directories such as GitHub's `PULL_REQUEST_TEMPLATE` are allowed only at the
   required integration boundary; files inside them still follow this rule.
 - `STYLE-006`: A file contains one primary responsibility. A primary type and
@@ -51,6 +51,11 @@ style.
   prohibited.
 - `STYLE-013`: Abbreviations are prohibited except approved industry protocol
   terms such as API, CLI, HTTP, ID, JSON, MCP, SQL, TLS, URL, and XML.
+  An exact provider, protocol, or storage product identifier MAY be used as one
+  lowercase token only at its outer infrastructure boundary when an accepted
+  ADR or dependency record names it. `auth0`, `github`, and `sqlite` are
+  approved for identity infrastructure; they MUST NOT become inner domain
+  vocabulary.
 - `STYLE-014`: Vague names and suffixes such as `Base`, `Common`, `Controller`,
   `Engine`, `Handler`, `Helper`, `Impl`, `Manager`, `Misc`, `Processor`,
   `Service`, `Types`, `Util`, `Utils`, `Worker`, and `Wrapper` are prohibited

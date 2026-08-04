@@ -24,6 +24,12 @@ coding agents must keep in context.
 | Testing | [Testing standards](standards/testing.md) |
 | Delivery and dependencies | [Delivery standards](standards/delivery.md) |
 
+The approved product authentication contract is in
+[Authentication and Authorization](authentication.md). The security standards
+govern its implementation; they do not replace that architecture. The complete
+Stage 3 slice inventories and gates are in the
+[Authentication Implementation Plan](plans/authentication.md).
+
 ## Mandatory design baseline
 
 Every implementation applies:

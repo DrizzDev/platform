@@ -60,3 +60,5 @@ library addition, a task plan, or a reversible implementation detail.
 | [0003](0003-local.md) | Local execution with cloud authority | Accepted |
 | [0004](0004-persistence.md) | SQLite journal and file artifact storage | Accepted |
 | [0005](0005-interfaces.md) | One capability core with MCP, CLI, and desktop adapters | Accepted |
+| [0006](0006-authentication.md) | OAuth flows by client type with cloud authorization | Accepted |
+| [0007](0007-capture.md) | Native host integration with a Drizz execution record | Accepted |

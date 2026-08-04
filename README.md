@@ -24,14 +24,17 @@ boundaries, and records the resulting work.
 ## Documents
 
 1. [Architecture](documents/architecture.md)
-2. [Technology stack](documents/stack.md)
-3. [Engineering guide](documents/engineering.md)
-4. [Delivery roadmap](documents/roadmap.md)
-5. [Decision records](documents/decisions/README.md)
-6. [Dependencies](documents/dependencies.md)
-7. [Standards exceptions](documents/exceptions.md)
-8. [Research](documents/research.md)
-9. [Agent instructions](AGENTS.md)
+2. [Authentication and authorization](documents/authentication.md)
+3. [Agent integration and execution capture](documents/capture.md)
+4. [Technology stack](documents/stack.md)
+5. [Engineering guide](documents/engineering.md)
+6. [Delivery roadmap](documents/roadmap.md)
+7. [Authentication implementation plan](documents/plans/authentication.md)
+8. [Decision records](documents/decisions/README.md)
+9. [Dependencies](documents/dependencies.md)
+10. [Standards exceptions](documents/exceptions.md)
+11. [Research](documents/research.md)
+12. [Agent instructions](AGENTS.md)
 
 ## Current status
 
@@ -40,7 +43,10 @@ boundaries, and records the resulting work.
 | Shared runtime foundation | Implemented |
 | Product capabilities | Not started |
 | Architecture | Approved baseline |
-| Technology stack | Approved recommendation baseline |
+| Authentication architecture | Approved |
+| Authentication implementation plan | Final |
+| Agent integration and capture architecture | Approved |
+| Technology stack | Approved foundation baseline |
 | Engineering standards | Approved and mandatory |
 | Delivery roadmap | Approved baseline |
 | Decision records | Accepted |
