@@ -3,23 +3,41 @@ package cli_test
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"strings"
 	"testing"
 
 	"github.com/DrizzDev/platform/internal/application/release"
+	"github.com/DrizzDev/platform/internal/identity/application/login"
+	"github.com/DrizzDev/platform/internal/identity/application/logout"
 	"github.com/DrizzDev/platform/internal/transport/cli"
 )
 
 type runner func(context.Context) error
 
+type authenticator func(context.Context) (login.Result, error)
+
+type exit func(context.Context) (logout.Result, error)
+
 type fixture struct {
 	arguments []string
 	output    io.Writer
 	server    cli.Runner
+	session   cli.Session
+	device    cli.Session
+	logout    cli.Departure
 }
 
 func (run runner) Run(scope context.Context) error {
+	return run(scope)
+}
+
+func (run authenticator) Run(scope context.Context) (login.Result, error) {
+	return run(scope)
+}
+
+func (run exit) Run(scope context.Context) (logout.Result, error) {
 	return run(scope)
 }
 
@@ -78,12 +96,132 @@ func TestDependencies(test *testing.T) {
 	}
 }
 
+func TestLogin(test *testing.T) {
+	test.Parallel()
+
+	var output bytes.Buffer
+	command, failure := cli.New(fixture{
+		arguments: []string{"login"},
+		output:    &output,
+		server:    runner(func(context.Context) error { test.Fatal("MCP called"); return nil }),
+		session:   authenticator(func(context.Context) (login.Result, error) { return login.Result{}, nil }),
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if failure := command.Run(context.Background()); failure != nil {
+		test.Fatal(failure)
+	}
+	if output.String() != "Signed in to Drizz.\n" {
+		test.Fatalf("output = %q", output.String())
+	}
+}
+
+func TestLoginUnavailable(test *testing.T) {
+	test.Parallel()
+
+	command, failure := cli.New(fixture{
+		arguments: []string{"login"},
+		output:    io.Discard,
+		server:    runner(func(context.Context) error { test.Fatal("MCP called"); return nil }),
+		session: authenticator(func(context.Context) (login.Result, error) {
+			return login.Result{}, errors.New("composition failed")
+		}),
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	outcome := command.Run(context.Background())
+	if outcome == nil || outcome.Error() != "Drizz authentication is temporarily unavailable. Try again." {
+		test.Fatalf("outcome = %v", outcome)
+	}
+}
+
+func TestUsage(test *testing.T) {
+	test.Parallel()
+
+	command, failure := cli.New(fixture{
+		arguments: []string{"login", "unexpected"},
+		output:    io.Discard,
+		server:    runner(func(context.Context) error { test.Fatal("MCP called"); return nil }),
+		session: authenticator(func(context.Context) (login.Result, error) {
+			test.Fatal("login ran on invalid syntax")
+			return login.Result{}, nil
+		}),
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	outcome := command.Run(context.Background())
+	if outcome == nil || outcome.Error() != "Usage: drizz login [--device]" {
+		test.Fatalf("outcome = %v", outcome)
+	}
+}
+
+func TestDevice(test *testing.T) {
+	test.Parallel()
+
+	var output bytes.Buffer
+	command, failure := cli.New(fixture{
+		arguments: []string{"login", "--device"},
+		output:    &output,
+		server:    runner(func(context.Context) error { test.Fatal("MCP called"); return nil }),
+		session: authenticator(func(context.Context) (login.Result, error) {
+			test.Fatal("browser login ran for --device")
+			return login.Result{}, nil
+		}),
+		device: authenticator(func(context.Context) (login.Result, error) { return login.Result{}, nil }),
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if failure := command.Run(context.Background()); failure != nil {
+		test.Fatal(failure)
+	}
+	if output.String() != "Signed in to Drizz.\n" {
+		test.Fatalf("output = %q", output.String())
+	}
+}
+
+func TestSignout(test *testing.T) {
+	test.Parallel()
+
+	var output bytes.Buffer
+	command, failure := cli.New(fixture{
+		arguments: []string{"logout"},
+		output:    &output,
+		server:    runner(func(context.Context) error { test.Fatal("MCP called"); return nil }),
+		logout:    exit(func(context.Context) (logout.Result, error) { return logout.Result{}, nil }),
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if failure := command.Run(context.Background()); failure != nil {
+		test.Fatal(failure)
+	}
+	if output.String() != "Signed out of Drizz.\n" {
+		test.Fatalf("output = %q", output.String())
+	}
+}
+
 func (fixture fixture) options() cli.Options {
 	identity, _ := release.New(release.Input{
 		Name:     "drizz",
 		Version:  "1.0.0",
 		Revision: "revision_123",
 	})
+	session := fixture.session
+	if session == nil {
+		session = authenticator(func(context.Context) (login.Result, error) { return login.Result{}, nil })
+	}
+	passcode := fixture.device
+	if passcode == nil {
+		passcode = authenticator(func(context.Context) (login.Result, error) { return login.Result{}, nil })
+	}
+	farewell := fixture.logout
+	if farewell == nil {
+		farewell = exit(func(context.Context) (logout.Result, error) { return logout.Result{}, nil })
+	}
 	return cli.Options{
 		Arguments: fixture.arguments,
 		Streams: cli.Streams{
@@ -93,5 +231,8 @@ func (fixture fixture) options() cli.Options {
 		},
 		Release: identity,
 		MCP:     fixture.server,
+		Login:   session,
+		Device:  passcode,
+		Logout:  farewell,
 	}
 }

@@ -226,8 +226,8 @@ The starting policy is:
 
 - access token lifetime: 15 minutes;
 - rotating refresh tokens for public native clients;
-- refresh-token idle lifetime: 30 days;
-- refresh-token maximum lifetime: 90 days;
+- refresh-token idle lifetime: 90 days;
+- refresh-token maximum lifetime: 1 year;
 - immediate local removal on logout, followed by server revocation where
   supported;
 - session recovery through a new login when refresh is expired, revoked,

@@ -45,6 +45,14 @@ func (provider Provider) Meter() metric.Meter {
 	return provider.telemetry.Meter()
 }
 
+func (provider Provider) Tracing() trace.TracerProvider {
+	return provider.telemetry.Tracing()
+}
+
+func (provider Provider) Metering() metric.MeterProvider {
+	return provider.telemetry.Metering()
+}
+
 // Close shuts observability down. A failure is recorded as a code alone; the
 // underlying provider error is returned for control flow but never logged, so
 // endpoint or machine detail cannot reach diagnostics.

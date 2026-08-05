@@ -33,6 +33,21 @@ func New(options Options) (*Host, error) {
 			identity:    identity,
 			build:       info,
 		},
+		Login: access{foundation{
+			environment: options.Environment,
+			streams:     options.Streams,
+			build:       info,
+		}},
+		Device: terminal{foundation{
+			environment: options.Environment,
+			streams:     options.Streams,
+			build:       info,
+		}},
+		Logout: departure{foundation{
+			environment: options.Environment,
+			streams:     options.Streams,
+			build:       info,
+		}},
 	})
 	if failure != nil {
 		return nil, failure

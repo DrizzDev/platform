@@ -24,6 +24,12 @@ var frameworks = []confinement{
 	{framework: "github.com/samber/slog-sentry", owner: "/internal/platform/reporting/sentry"},
 	{framework: "go.opentelemetry.io/otel/sdk", owner: "/internal/platform/telemetry"},
 	{framework: "go.opentelemetry.io/otel/exporters", owner: "/internal/platform/telemetry"},
+	{framework: "github.com/zalando/go-keyring", owner: "/internal/identity/infrastructure/vault"},
+	{framework: "modernc.org/sqlite", owner: "/internal/identity/infrastructure/sqlite"},
+	{framework: "github.com/coreos/go-oidc", owner: "/internal/identity/infrastructure/auth0"},
+	{framework: "golang.org/x/oauth2", owner: "/internal/identity/infrastructure/auth0"},
+	{framework: "github.com/hashicorp/go-retryablehttp", owner: "/internal/platform/transport"},
+	{framework: "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp", owner: "/internal/platform/transport"},
 }
 
 func TestFramework(test *testing.T) {

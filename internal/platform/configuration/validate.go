@@ -10,7 +10,9 @@ func (loader Loader) validate() error {
 		if loader.reject(key) {
 			return errors.New("unknown Drizz setting; supported settings are " +
 				"DRIZZ_LOG_LEVEL, DRIZZ_TELEMETRY_EXPORTER, DRIZZ_TELEMETRY_ENDPOINT, " +
-				"DRIZZ_SENTRY_DSN, DRIZZ_SENTRY_SAMPLE_RATE, DRIZZ_SENTRY_ENVIRONMENT")
+				"DRIZZ_SENTRY_DSN, DRIZZ_SENTRY_SAMPLE_RATE, DRIZZ_SENTRY_ENVIRONMENT, " +
+				"DRIZZ_AUTH0_ISSUER, DRIZZ_AUTH0_CLIENT, DRIZZ_AUTH0_AUDIENCE, " +
+				"DRIZZ_AUTH0_REDIRECT, DRIZZ_AUTH0_SCOPES, DRIZZ_SESSION, DRIZZ_CLOUD")
 		}
 	}
 	return nil
@@ -21,7 +23,8 @@ func (loader Loader) reject(key string) bool {
 		return false
 	}
 	switch key {
-	case level, exporter, endpoint, dsn, sample, stage:
+	case level, exporter, endpoint, dsn, sample, stage,
+		issuer, client, audience, redirect, scopes, session, cloud:
 		return false
 	default:
 		return true

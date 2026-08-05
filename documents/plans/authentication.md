@@ -427,6 +427,15 @@ Order is Gate 1, Slice 2, Slice 3, Slices 4 and 5, Slice 6, Slice 7, Slice 8,
 then Gate 9. Slices 4 and 5 may overlap only with disjoint files. Every item uses
 the mandatory inventory fields below.
 
+**Amendment (2026-08-05, owner decision):** Gates 1 through Slice 7 are complete,
+green, and proven live. **Slice 8 (workload authentication) is deferred** as it
+is not the current priority; it resumes once evidence F5 is resolved. Gate 9
+release qualification proceeds now for the completed user-authentication
+vertical, macOS first, since that is the only supported vault available to the
+owner. Progress and the remaining `TODO(slice-8)` and cross-platform,
+signing, and supply-chain work are tracked in
+[the qualification runbook](../runbooks/authentication.md).
+
 ### Gate 1: Evidence and threat model
 
 | Field | Decision |
