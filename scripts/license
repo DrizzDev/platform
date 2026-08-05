@@ -28,7 +28,7 @@ while IFS='|' read -r module directory; do
     echo "license: no license file found for ${module}" >&2
     exit 1
   fi
-  if grep -Eiq 'Apache License|Permission is hereby granted, free of charge|Redistribution and use in source and binary forms|Permission to use, copy, modify, and/or distribute this software|dual-licensed under the Unlicense and MIT' "${license}"; then
+  if grep -Eiq 'Apache License|Permission is hereby granted, free of charge|Redistribution and use in source and binary forms|Permission to use, copy, modify, and/or distribute this software|dual-licensed under the Unlicense and MIT|Mozilla Public License,? version 2\.0' "${license}"; then
     continue
   fi
   echo "license: unapproved runtime license for ${module}: ${license}" >&2

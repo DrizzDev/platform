@@ -40,6 +40,8 @@ func (options Options) otlp(scope context.Context) (Provider, error) {
 	return Provider{
 		tracer:  trace.Tracer(options.Build.Name()),
 		meter:   meter.Meter(options.Build.Name()),
+		traces:  trace,
+		meters:  meter,
 		once:    &sync.Once{},
 		outcome: new(error),
 		close: func(scope context.Context) error {

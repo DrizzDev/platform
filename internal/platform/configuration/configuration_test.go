@@ -49,6 +49,32 @@ func TestOTLP(test *testing.T) {
 	}
 }
 
+func TestIdentity(test *testing.T) {
+	test.Parallel()
+
+	settings, failure := configuration.New([]string{
+		"DRIZZ_AUTH0_ISSUER=https://drizz-dev.eu.auth0.com/",
+		"DRIZZ_AUTH0_CLIENT=platform_cli",
+		"DRIZZ_AUTH0_AUDIENCE=https://platform.drizz.dev",
+		"DRIZZ_AUTH0_REDIRECT=http://127.0.0.1:8490/callback",
+		"DRIZZ_AUTH0_SCOPES=openid,offline_access",
+		"DRIZZ_SESSION=LOCAL",
+	}).Load()
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	identity := settings.Identity()
+	if identity.Issuer() != "https://drizz-dev.eu.auth0.com/" || identity.Client() != "platform_cli" {
+		test.Fatalf("identity = %+v", identity)
+	}
+	if identity.Audience() != "https://platform.drizz.dev" || identity.Session() != "LOCAL" {
+		test.Fatalf("identity = %+v", identity)
+	}
+	if len(identity.Scopes()) != 2 || identity.Scopes()[0] != "openid" {
+		test.Fatalf("scopes = %v", identity.Scopes())
+	}
+}
+
 func TestAmbient(test *testing.T) {
 	test.Parallel()
 

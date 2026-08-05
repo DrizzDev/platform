@@ -15,6 +15,8 @@ func (options Options) noop() Provider {
 	return Provider{
 		tracer:  traces.Tracer(options.Build.Name()),
 		meter:   meters.Meter(options.Build.Name()),
+		traces:  traces,
+		meters:  meters,
 		once:    &sync.Once{},
 		outcome: new(error),
 		close: func(scope context.Context) error {

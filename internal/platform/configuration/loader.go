@@ -3,6 +3,7 @@ package configuration
 import (
 	"strings"
 
+	"github.com/DrizzDev/platform/internal/platform/configuration/identity"
 	"github.com/DrizzDev/platform/internal/platform/configuration/logging"
 	"github.com/DrizzDev/platform/internal/platform/configuration/reporting"
 	"github.com/DrizzDev/platform/internal/platform/configuration/reporting/sentry"
@@ -49,5 +50,14 @@ func (loader Loader) Load() (Settings, error) {
 	if failure != nil {
 		return Settings{}, failure
 	}
-	return Settings{logging: logging, reporting: reporting, telemetry: telemetry}, nil
+	identity := identity.New(identity.Input{
+		Issuer:   loader.values[issuer],
+		Client:   loader.values[client],
+		Audience: loader.values[audience],
+		Redirect: loader.values[redirect],
+		Session:  loader.values[session],
+		Scopes:   loader.values[scopes],
+		Cloud:    loader.values[cloud],
+	})
+	return Settings{logging: logging, reporting: reporting, telemetry: telemetry, identity: identity}, nil
 }

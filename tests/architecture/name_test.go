@@ -106,7 +106,7 @@ func (repository repository) prohibited(name string) bool {
 	if name == "" || strings.HasPrefix(name, "Test") || strings.HasPrefix(name, "Fuzz") || strings.HasPrefix(name, "Benchmark") {
 		return false
 	}
-	mandated := map[string]bool{"SessionID": true}
+	mandated := map[string]bool{"SessionID": true, "RoundTrip": true}
 	if mandated[name] {
 		return false
 	}
