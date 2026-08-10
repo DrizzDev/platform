@@ -15,3 +15,8 @@ CREATE TABLE journal (
 ) STRICT;
 
 CREATE INDEX journal_trace ON journal (trace, sequence);
+
+CREATE TABLE lease (
+    trace TEXT    PRIMARY KEY,
+    until INTEGER NOT NULL
+) STRICT;

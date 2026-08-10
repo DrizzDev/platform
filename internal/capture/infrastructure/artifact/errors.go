@@ -20,3 +20,11 @@ type Absent struct{}
 func (Absent) Error() string {
 	return "no artifact is stored for the digest"
 }
+
+// Saturated reports that the disk budget is exhausted and new writes are refused until reclaim frees space.
+// It is a typed back-pressure signal, never a silent drop.
+type Saturated struct{}
+
+func (Saturated) Error() string {
+	return "the artifact store is over its disk budget"
+}

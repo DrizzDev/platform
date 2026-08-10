@@ -115,7 +115,41 @@ deletion (which is not possible for user-owned data and is not the industry norm
   safe. A store-level single-instance lock is rejected — it would break legitimate
   coexistence to prevent a problem that cannot occur.
 
-## 8. Verification
+## 8. Slice 5 — acknowledgement-based cleanup, retention, leases, budgets
+
+A synchronized entry (`Synced`, set when the courier's upload is acknowledged) is
+the only entry a reclaim pass ever removes; un-synchronized evidence is the hard
+floor and is never deleted.
+
+- **`internal/capture/application/janitor`.** `Janitor.Run` is drained by the host
+  loop (no timer). Each pass: age out `Synced` records past their category's
+  retention (`catalogue`, measured off `stamped`); then sweep artifacts no
+  remaining entry references, sparing any within a grace window that closes the
+  `Put`-then-`Append` race. Selection (row delete) is one transaction; physical
+  file deletion is idempotent and re-derived each pass, so an interrupted pass
+  resumes (REL-020). No cross-process lock — deletes are idempotent and reclaim is
+  conservative.
+- **Budget with hysteresis (REL-022).** `Ceiling` (high-water) and `Relief`
+  (low-water). Over the ceiling, reclaim escalates to `Synced` records even within
+  retention — safe, the cloud holds them. When only un-synchronized evidence
+  remains, the artifact store's write gate is raised (`Restrict`; `Put` returns a
+  typed `Saturated`, REL-017) and the user is alerted through a `notifier` port
+  plus a pressure metric; new writes degrade rather than deleting evidence. The
+  gate lifts (`Admit`) once reclaim frees below the relief mark.
+- **Active-execution lease.** The recorder refreshes a durable lease on its trace
+  each `Record` (no timer; swallowed on failure). A reclaim pass skips a
+  live-leased trace; a crashed holder's lease lapses and protection lifts.
+- **Store surface added.** journal: `Settled`, `Discard`, `Digests`, `Lease`,
+  `Leases`. artifact: `Prune(keep predicate)`, `Footprint`, `Restrict`, `Admit`,
+  and `Put` honouring the gate. The `janitor` ports pass only domain and standard
+  types (a `keep func(digest, time) bool` predicate keeps grace and reference
+  policy in the application while the walk stays in the store), so no port points
+  outward (ARC-009). `lease` table folded into the single `0001` baseline.
+- **Deferred wiring.** The composition root must adapt the identity session flow to
+  the courier's credential provider (Slice 4b) and construct the notifier and the
+  janitor loop. No `cmd` wiring exists yet.
+
+## 9. Verification
 
 Platform general gate: `make verify`. Later slices add the ADR 0004 persistence
 qualification (crash, corruption, disk-full, duplicate-process, migration,

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	metricnoop "go.opentelemetry.io/otel/metric/noop"
 	tracenoop "go.opentelemetry.io/otel/trace/noop"
@@ -46,12 +47,18 @@ func (fixture fixture) build() (recording.Recorder, sqlite.Store, artifact.Store
 	if failure != nil {
 		fixture.test.Fatal(failure)
 	}
-	recorder, failure := recording.New(recording.Options{Writer: store, Sink: vault, Logger: logger})
+	recorder, failure := recording.New(recording.Options{
+		Writer: store, Sink: vault, Keeper: store, Clock: clock{}, Logger: logger, Lease: time.Minute,
+	})
 	if failure != nil {
 		fixture.test.Fatal(failure)
 	}
 	return recorder, store, vault
 }
+
+type clock struct{}
+
+func (clock) Now() time.Time { return time.Unix(1_000_000, 0) }
 
 func TestRecord(test *testing.T) {
 	test.Parallel()
@@ -90,6 +97,26 @@ func TestRecord(test *testing.T) {
 	}
 }
 
+func TestLeaseProtectsRun(test *testing.T) {
+	test.Parallel()
+
+	recorder, store, _ := fixture{test: test}.build()
+	execution, failure := recorder.Begin()
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	scope := context.Background()
+	execution.Record(scope, recording.Note{Origin: origin.Capability, Fidelity: fidelity.Exact, Category: category.Log})
+
+	claims, failure := store.Leases(scope)
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if len(claims) != 1 || claims[0].Trace.String() != execution.Trace().String() {
+		test.Fatalf("recording did not lease the running trace, claims = %d", len(claims))
+	}
+}
+
 type breaker struct{}
 
 func (breaker) Append(context.Context, journal.Entry) error {
@@ -100,6 +127,10 @@ func (breaker) Put(context.Context, io.Reader) (digest.Digest, error) {
 	return digest.Digest{}, errors.New("store is gone")
 }
 
+func (breaker) Lease(context.Context, journal.Claim) error {
+	return errors.New("store is gone")
+}
+
 func TestObservational(test *testing.T) {
 	test.Parallel()
 
@@ -107,7 +138,10 @@ func TestObservational(test *testing.T) {
 	recorder, failure := recording.New(recording.Options{
 		Writer: breaker{},
 		Sink:   breaker{},
+		Keeper: breaker{},
+		Clock:  clock{},
 		Logger: slog.New(slog.NewJSONHandler(&log, nil)),
+		Lease:  time.Minute,
 	})
 	if failure != nil {
 		test.Fatal(failure)

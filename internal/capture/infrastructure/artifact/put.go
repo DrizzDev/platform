@@ -17,6 +17,10 @@ func (store Store) Put(scope context.Context, source io.Reader) (digest.Digest, 
 	var key digest.Digest
 
 	failure := store.observe(scope, probe{name: "put", work: func(context.Context) error {
+		if store.restricted() {
+			return Saturated{}
+		}
+
 		temporary, failure := os.CreateTemp(store.temp, "artifact-*")
 		if failure != nil {
 			return failure

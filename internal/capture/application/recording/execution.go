@@ -50,6 +50,8 @@ func (execution *Execution) Trace() trace.Trace {
 // entry is logged and dropped, so recording cannot break the capability it observes.
 func (execution *Execution) Record(scope context.Context, note Note) {
 
+	execution.renew(scope)
+
 	value, failure := execution.recorder.mint()
 	if failure != nil {
 		execution.recorder.drop(scope, "span")
@@ -95,6 +97,17 @@ func (execution *Execution) Record(scope context.Context, note Note) {
 	}
 	if failure := execution.recorder.writer.Append(scope, entry); failure != nil {
 		execution.recorder.drop(scope, "append")
+	}
+}
+
+// renew extends the execution's lease so a reclaim pass leaves its records alone while it runs. A failure to lease is
+// logged and dropped, never surfaced, so protection is best-effort and recording stays observational.
+func (execution *Execution) renew(scope context.Context) {
+	deadline := execution.recorder.clock.Now().Add(execution.recorder.lease)
+
+	claim := journal.Claim{Trace: execution.trace, Until: deadline}
+	if failure := execution.recorder.keeper.Lease(scope, claim); failure != nil {
+		execution.recorder.drop(scope, "lease")
 	}
 }
 
