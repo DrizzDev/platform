@@ -10,7 +10,7 @@ import (
 )
 
 // verify rejects a tampered or swapped binary before exec: the path must resolve to a file no other user can write,
-// and its digest must match the pin (SEC-012, SEC-014).
+// and its digest must match the pin.
 func (options Options) verify() error {
 	resolved, failure := filepath.EvalSymlinks(options.Location)
 	if failure != nil {

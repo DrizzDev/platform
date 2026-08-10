@@ -10,7 +10,7 @@ import (
 )
 
 // read runs a read-only request with bounded retry: only a transient transport outage is retried, with backoff and
-// jitter, never a device error (REL-013).
+// jitter, never a device error.
 func (driver *Driver) read(scope context.Context, request Request) (Response, error) {
 	var failure error
 

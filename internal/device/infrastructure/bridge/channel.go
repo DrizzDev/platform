@@ -55,7 +55,7 @@ func (channel *Channel) release() {
 }
 
 // observe recycles a wedged-but-alive sidecar: patience consecutive request timeouts — not a clean death — tear the
-// session down so the next call restarts it (REL-003).
+// session down so the next call restarts it.
 func (channel *Channel) observe(failure error) {
 	if errors.Is(failure, context.DeadlineExceeded) {
 		if channel.stalls.Add(1) >= patience {
@@ -70,7 +70,7 @@ func (channel *Channel) observe(failure error) {
 }
 
 // ensure returns the live session, starting one under single-flight if needed; repeated start failures back off so
-// a broken sidecar is not hammered (REL-013).
+// a broken sidecar is not hammered.
 func (channel *Channel) ensure(scope context.Context) (*session, error) {
 	if live := channel.alive(); live != nil {
 		return live, nil

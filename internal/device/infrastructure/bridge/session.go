@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 )
 
-// session is one live sidecar conversation, created per process instance and torn down as a unit on death (REL-003).
+// session is one live sidecar conversation, created per process instance and torn down as a unit on death.
 type session struct {
 	input io.Writer
 
@@ -56,8 +56,7 @@ func (session *session) drain(output io.Reader) {
 	}
 }
 
-// scan reads one newline-delimited frame, bounded so a hostile or corrupt frame cannot exhaust memory (SEC-022,
-// REL-004).
+// scan reads one newline-delimited frame, bounded so a hostile or corrupt frame cannot exhaust memory.
 func (session *session) scan(reader *bufio.Reader) ([]byte, error) {
 	var buffer []byte
 	for {
@@ -89,7 +88,7 @@ func (session *session) settle(message inbound) {
 }
 
 // expire tears the session down exactly once: it fails every pending caller, stops and reaps the process, then
-// signals departure (REL-007, REL-010).
+// signals departure.
 func (session *session) expire() {
 	session.mutex.Lock()
 

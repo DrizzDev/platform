@@ -4,7 +4,8 @@ import "errors"
 
 const limit = 32 << 20
 
-// Image is the raw bytes of one captured frame. It defensively clones on the way in and out so the value stays immutable.
+// Image is the raw bytes of one captured frame.
+// It defensively clones on the way in and out so the value stays immutable.
 type Image struct {
 	data []byte
 }
