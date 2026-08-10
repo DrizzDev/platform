@@ -15,6 +15,11 @@ func Verify(options Options) error {
 	return options.verify()
 }
 
+// Wrap builds a Driver over a test channel.
+func Wrap(channel *Channel) *Driver {
+	return &Driver{channel: channel}
+}
+
 // Probe drives the bounded frame reader in isolation.
 type Probe struct {
 	Source io.Reader

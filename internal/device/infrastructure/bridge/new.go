@@ -1,6 +1,6 @@
 package bridge
 
-func New(options Options) (*Channel, error) {
+func New(options Options) (*Driver, error) {
 	if failure := options.validate(); failure != nil {
 		return nil, failure
 	}
@@ -10,5 +10,5 @@ func New(options Options) (*Channel, error) {
 		slots:   make(chan struct{}, inflight),
 	}
 	channel.build = channel.spawn
-	return channel, nil
+	return &Driver{channel: channel}, nil
 }

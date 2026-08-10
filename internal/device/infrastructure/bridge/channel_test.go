@@ -47,6 +47,7 @@ type puppet struct {
 	output  *io.PipeWriter
 	handler func(call) response
 	cancels chan int64
+	crash   bool
 	mutex   sync.Mutex
 }
 
@@ -83,6 +84,12 @@ func (puppet *puppet) dispatch(line []byte) {
 		_ = puppet.output.Close()
 		puppet.mutex.Unlock()
 	default:
+		if puppet.crash && request.Method != "health" {
+			puppet.mutex.Lock()
+			_ = puppet.output.Close()
+			puppet.mutex.Unlock()
+			return
+		}
 		go puppet.reply(request)
 	}
 }

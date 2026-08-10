@@ -5,6 +5,8 @@ import "time"
 const (
 	dialect  = 1
 	inflight = 64
+	attempts = 3        // bounded retry budget for read-only requests
+	roster   = 256      // maximum devices accepted from one list reply
 	patience = 3        // consecutive request timeouts that recycle a wedged-but-alive sidecar
 	frame    = 64 << 20 // a screenshot frame is large; cap well above a base64-encoded image
 	grace    = 5 * time.Second
