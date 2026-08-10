@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// Channel is a supervised, long-lived stdio JSON-RPC conversation with the sidecar;
-// the live session is an atomic pointer so steady-state dispatch is lock-free (only start/restart locks).
+// Channel is a supervised, long-lived stdio JSON-RPC conversation with the sidecar; the live session is an atomic
+// pointer so steady-state dispatch is lock-free (only start/restart locks).
 type Channel struct {
 	build func(context.Context) (*session, error)
 
@@ -54,8 +54,8 @@ func (channel *Channel) release() {
 	<-channel.slots
 }
 
-// observe recycles a wedged-but-alive sidecar: patience consecutive request
-// timeouts — not a clean death — tear the session down so the next call restarts it (REL-003).
+// observe recycles a wedged-but-alive sidecar: patience consecutive request timeouts — not a clean death — tear the
+// session down so the next call restarts it (REL-003).
 func (channel *Channel) observe(failure error) {
 	if errors.Is(failure, context.DeadlineExceeded) {
 		if channel.stalls.Add(1) >= patience {
@@ -69,8 +69,8 @@ func (channel *Channel) observe(failure error) {
 	channel.stalls.Store(0)
 }
 
-// ensure returns the live session, starting one under single-flight if needed;
-// repeated start failures back off so a broken sidecar is not hammered (REL-013).
+// ensure returns the live session, starting one under single-flight if needed; repeated start failures back off so
+// a broken sidecar is not hammered (REL-013).
 func (channel *Channel) ensure(scope context.Context) (*session, error) {
 	if live := channel.alive(); live != nil {
 		return live, nil

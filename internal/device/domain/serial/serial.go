@@ -9,8 +9,7 @@ import (
 
 const limit = 256
 
-// Serial is a device's transport identity — the value adb or the sidecar uses to
-// address one device.
+// Serial is a device's transport identity — the value adb or the sidecar uses to address one device.
 type Serial struct {
 	value string
 }

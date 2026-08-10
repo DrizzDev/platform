@@ -9,9 +9,8 @@ import (
 	"github.com/DrizzDev/platform/internal/device/domain/touch"
 )
 
-// Flow drives a device through the neutral bridge port and maps every bridge
-// outcome to a stable, agent-facing code. It never inspects a vendor or sidecar
-// detail. New capabilities are added as further methods over the same port.
+// Flow drives a device through the neutral bridge port and maps every bridge outcome to a stable, agent-facing code.
+// It never inspects a vendor or sidecar detail. New capabilities are added as further methods over the same port.
 type Flow struct {
 	bridge Bridge
 }

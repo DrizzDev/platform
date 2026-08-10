@@ -1,7 +1,7 @@
 package format
 
-// Format is the encoding of a captured frame. The supported set is the vocabulary
-// the sidecar guarantees; new encodings extend it additively.
+// Format is the encoding of a captured frame. The supported set is the vocabulary the sidecar guarantees;
+// new encodings extend it additively.
 type Format string
 
 const (

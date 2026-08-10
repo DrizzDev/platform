@@ -48,8 +48,7 @@ func (inbound inbound) resolve() answer {
 	return answer{result: inbound.Result}
 }
 
-// translate surfaces only the error kind; the raw sidecar message is dropped so no
-// internal detail reaches a caller (SEC-008).
+// translate surfaces only the error kind; the raw sidecar message is dropped so no internal detail reaches a caller (SEC-008).
 func (problem problem) translate() error {
 	if problem.Data.Kind != "" {
 		return Fault{kind: problem.Data.Kind}

@@ -24,8 +24,8 @@ var backward = map[string]platform.Platform{
 	"ios-device":    platform.Handset,
 }
 
-// kinds is the single registry mapping a sidecar error class to a device port
-// failure; an unmapped kind falls through to Unavailable at the call site.
+// kinds is the single registry mapping a sidecar error class to a device port failure; an unmapped kind falls through
+// to Unavailable at the call site.
 var kinds = map[string]error{
 	"DeviceNotFoundError":         control.Missing{},
 	"DeviceUnauthorizedError":     control.Unauthorized{},

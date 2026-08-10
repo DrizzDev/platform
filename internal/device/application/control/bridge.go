@@ -23,9 +23,8 @@ type Actor interface {
 	Tap(context.Context, touch.Touch) error
 }
 
-// Bridge is the neutral device-adapter port. The infrastructure adapter over the
-// device-bridge sidecar implements it; the flow depends only on this contract,
-// never on a vendor or transport type. New capabilities extend one role
+// Bridge is the neutral device-adapter port. The infrastructure adapter over the device-bridge sidecar implements it;
+// the flow depends only on this contract, never on a vendor or transport type. New capabilities extend one role
 // interface without disturbing the others.
 type Bridge interface {
 	Actor

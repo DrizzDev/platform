@@ -1,7 +1,6 @@
 package bridge
 
-// Fault is a device-bridge application error surfaced only by kind; the raw sidecar
-// message is never carried here (SEC-008).
+// Fault is a device-bridge application error surfaced only by kind; the raw sidecar message is never carried here (SEC-008).
 type Fault struct {
 	kind string
 }
@@ -14,8 +13,8 @@ func (fault Fault) Kind() string {
 	return fault.kind
 }
 
-// The transport errors are typed structs so callers match them without string
-// comparison and without an errFoo sentinel the name gate would reject.
+// The transport errors are typed structs so callers match them without string comparison and without an errFoo
+// sentinel the name gate would reject.
 
 type Closed struct{}
 

@@ -2,9 +2,8 @@ package control
 
 import "github.com/DrizzDev/platform/internal/device/domain/code"
 
-// The errors below are the control-owned failure contract the bridge adapter
-// returns, so the flow maps an outcome to a stable code without inspecting any
-// vendor or sidecar detail. Cancellation is derived from the caller context, not
+// The errors below are the control-owned failure contract the bridge adapter returns, so the flow maps an outcome to
+// a stable code without inspecting any vendor or sidecar detail. Cancellation is derived from the caller context, not
 // carried here.
 
 // Missing reports that no device matched the requested identifier.

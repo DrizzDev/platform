@@ -1,7 +1,7 @@
 package platform
 
-// Platform is the device family a request is routed to. The values are the
-// internal representation; the bridge adapter translates them to and from the sidecar's wire tokens.
+// Platform is the device family a request is routed to. The values are the internal representation; the bridge
+// adapter translates them to and from the sidecar's wire tokens.
 type Platform string
 
 const (

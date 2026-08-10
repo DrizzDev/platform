@@ -7,8 +7,8 @@ type Request struct {
 	Method string
 }
 
-// Response is the raw result; the channel never interprets it — the Bridge
-// translation validates and maps it to a domain type.
+// Response is the raw result; the channel never interprets it — the Bridge translation validates and maps it to a
+// domain type.
 type Response struct {
 	Result json.RawMessage
 }

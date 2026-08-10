@@ -9,8 +9,8 @@ import (
 	"github.com/DrizzDev/platform/internal/device/application/control"
 )
 
-// read runs a read-only request with bounded retry: only a transient transport
-// outage is retried, with backoff and jitter, never a device error (REL-013).
+// read runs a read-only request with bounded retry: only a transient transport outage is retried, with backoff and
+// jitter, never a device error (REL-013).
 func (driver *Driver) read(scope context.Context, request Request) (Response, error) {
 	var failure error
 
@@ -44,8 +44,8 @@ func (driver *Driver) pause(scope context.Context, attempt int) error {
 	}
 }
 
-// fault maps a transport failure to the device port's typed error; a context error
-// passes through so the flow renders cancellation.
+// fault maps a transport failure to the device port's typed error; a context error passes through so the flow
+// renders cancellation.
 func (driver *Driver) fault(cause error) error {
 	var problem Fault
 

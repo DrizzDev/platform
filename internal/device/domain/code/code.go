@@ -1,8 +1,7 @@
 package code
 
-// Code is the stable, agent-facing device failure vocabulary. Each code owns its
-// safe, actionable detail; no raw cause, vendor string, path, endpoint, or serial
-// is ever carried here.
+// Code is the stable, agent-facing device failure vocabulary. Each code owns its safe, actionable detail; no raw
+// cause, vendor string, path, endpoint, or serial is ever carried here.
 type Code string
 
 const (

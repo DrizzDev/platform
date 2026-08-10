@@ -9,8 +9,7 @@ import (
 
 const limit = 1 << 16
 
-// Capture is one observation of a device screen: the encoded frame and the
-// dimensions an agent reasons over.
+// Capture is one observation of a device screen: the encoded frame and the dimensions an agent reasons over.
 type Capture struct {
 	width  int
 	height int

@@ -2,8 +2,8 @@ package bridge
 
 import "context"
 
-// spawn is the production session factory: the binary is integrity-checked before
-// exec and the health handshake completes before the session is handed out.
+// spawn is the production session factory: the binary is integrity-checked before exec and the health handshake
+// completes before the session is handed out.
 func (channel *Channel) spawn(scope context.Context) (*session, error) {
 	if failure := channel.options.verify(); failure != nil {
 		return nil, failure

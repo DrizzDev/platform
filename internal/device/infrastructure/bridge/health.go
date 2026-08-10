@@ -11,8 +11,8 @@ type report struct {
 	Protocol int    `json:"protocol"`
 }
 
-// greet handshakes and refuses an incompatible protocol, failing closed rather than
-// speaking a version it does not understand.
+// greet handshakes and refuses an incompatible protocol, failing closed rather than speaking a version it does not
+// understand.
 func (session *session) greet(scope context.Context) error {
 	response, failure := session.exchange(scope, Request{Method: ping})
 	if failure != nil {

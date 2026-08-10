@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 )
 
-// passthrough is the device toolchain allowlist; no secret or unrelated host
-// variable crosses into the child (SEC-008, SEC-013).
+// passthrough is the device toolchain allowlist; no secret or unrelated host variable crosses into the child
+// (SEC-008, SEC-013).
 var passthrough = []string{
 	"PATH", "HOME", "TMPDIR", "LANG",
 	"ANDROID_HOME", "ANDROID_SDK_ROOT", "DEVELOPER_DIR",
@@ -22,8 +22,8 @@ type machine struct {
 	logs    io.ReadCloser
 }
 
-// spawn runs the sidecar with an explicit executable and arg list, an allowlisted
-// environment, a fixed directory, and graceful-shutdown escalation — no shell (SEC-013).
+// spawn runs the sidecar with an explicit executable and arg list, an allowlisted environment, a fixed directory,
+// and graceful-shutdown escalation — no shell (SEC-013).
 func (options Options) spawn(scope context.Context) (machine, error) {
 
 	command := exec.CommandContext(scope, options.Location)
