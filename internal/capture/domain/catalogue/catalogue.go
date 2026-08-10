@@ -9,7 +9,7 @@ import (
 )
 
 // Catalogue is the classification: each data category maps to one handling policy. A category with no policy fails
-// closed at lookup rather than defaulting to something permissive (SEC-011).
+// closed at lookup rather than defaulting to something permissive.
 type Catalogue struct {
 	policies map[category.Category]policy.Policy
 }

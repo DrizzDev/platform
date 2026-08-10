@@ -54,8 +54,17 @@ func TestCorrupt(test *testing.T) {
 	if failure := os.WriteFile(path, []byte("this is not a database"), 0o600); failure != nil {
 		test.Fatal(failure)
 	}
-	if _, failure := (fixture{test: test}).build(path); failure == nil {
-		test.Fatal("a corrupt database file was opened")
+	store := fixture{test: test}.open(path)
+	value, failure := store.Query("PRAGMA user_version")
+	if failure != nil {
+		test.Fatalf("recovered store is unusable: %v", failure)
+	}
+	if value != "1" {
+		test.Fatalf("recovered version = %q", value)
+	}
+	aside, _ := filepath.Glob(path + ".corrupt-*")
+	if len(aside) == 0 {
+		test.Fatal("the corrupt database was not quarantined")
 	}
 }
 

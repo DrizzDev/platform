@@ -14,7 +14,7 @@ import (
 )
 
 // Read returns every entry for a trace in recorded order, reconstructing each into a validated value. A row that cannot
-// be reconstructed is a corruption and fails the read rather than yielding a partial value (REL-021).
+// be reconstructed is a corruption and fails the read rather than yielding a partial value.
 func (store Store) Read(scope context.Context, subject trace.Trace) ([]journal.Entry, error) {
 	var entries []journal.Entry
 

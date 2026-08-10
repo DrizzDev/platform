@@ -71,7 +71,51 @@ and references in SQLite.
 | Tests | per-VO validation + invariants (inferred-not-exact; no-upload-forbids-sync; retention/limit bounds; parent required off-root; backtrace walks root→leaf). |
 | Verification | scoped `go test` + architecture gates; `make verify` is the merge gate. |
 
-## 6. Verification
+## 6. Slice 2b — artifact storage and deferrals
+
+Slice 2b adds `internal/capture/infrastructure/artifact`: a content-addressed file
+store. `digest.Digest` (a validated SHA-256) names each object; `Put` streams to a
+bounded temp, hashes, and atomically publishes by rename; `Get` re-verifies the
+digest on read so silent corruption fails rather than returns bad bytes; `Sweep`
+removes temps orphaned by a crashed write.
+
+- **Artifact size ceiling.** A single canonical default, `ceiling = 128 MiB`, large
+  enough that no legitimate artifact (screenshots are bounded at 32 MiB) is
+  rejected — set conservatively so we never lose data. It is **configurable in one
+  place** via `Options.Ceiling`; the default applies only when unset.
+- **DEFERRED TO SLICE 5 — do not miss.** Reference-aware artifact retention is NOT
+  in 2b. Deleting an artifact once no journal entry references its digest, with
+  leases, disk budgets, and protection for active or un-synchronized evidence
+  (REL-020), belongs to Slice 5 (acknowledgement-based cleanup). Slice 2b cleans up
+  **orphaned temporary files only**; a published object is never deleted by 2b.
+
+## 7. Store resilience — deletion, corruption, concurrency
+
+The data directory (`~/.config/drizz`) is user-owned; a user or another agent can
+delete or damage it. We make the store resilient rather than trying to prevent
+deletion (which is not possible for user-owned data and is not the industry norm).
+
+- **Corruption → quarantine and rebuild (done, capture sqlite).** On open, a
+  corrupt or not-a-database file is detected by its SQLite result code, renamed
+  aside as `<db>.corrupt-<nanos>` (with any `-wal`/`-shm`), and a fresh database is
+  created — so a damaged file never blocks startup, and the bad file is preserved,
+  never silently discarded. Identity's store should get the same (tracked
+  follow-up; not on this branch).
+- **Deletion → self-heal.** A missing directory or database is recreated on start;
+  a missing artifact returns `Absent`; atomic temp+rename means no half-written
+  file. Deleting the data dir loses history but never crashes or corrupts, and the
+  binary itself lives elsewhere and is untouched.
+- **Capture is observational (enforced in Slice 3).** A device or agent operation
+  MUST proceed and return even if the journal or artifact write fails; the failure
+  is logged, never propagated. This is the primary protection: even if the data dir
+  is deleted mid-run, the device tool keeps working — only recording degrades.
+- **Concurrency: no single-instance lock.** MCP and CLI share these stores at the
+  same time by design. SQLite WAL + `busy_timeout` + one-writer, and
+  content-addressed atomic-rename artifacts, already make multi-process access
+  safe. A store-level single-instance lock is rejected — it would break legitimate
+  coexistence to prevent a problem that cannot occur.
+
+## 8. Verification
 
 Platform general gate: `make verify`. Later slices add the ADR 0004 persistence
 qualification (crash, corruption, disk-full, duplicate-process, migration,

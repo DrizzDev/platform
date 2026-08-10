@@ -1,6 +1,6 @@
 package category
 
-// Category is the fixed set of sensitive product-data classes; anything unclassified fails closed (SEC-011).
+// Category is the fixed set of sensitive product-data classes; anything unclassified fails closed.
 type Category string
 
 const (

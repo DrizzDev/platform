@@ -7,21 +7,32 @@ import (
 	"net/url"
 
 	"go.opentelemetry.io/otel/metric"
-
-	_ "modernc.org/sqlite"
 )
 
+// New opens the store and, if the database is corrupt, quarantines it and starts fresh,
+// so a damaged file never prevents the application from starting.
 func New(scope context.Context, options Options) (Store, error) {
-
 	if failure := options.validate(); failure != nil {
 		return Store{}, failure
 	}
-	latency, failure := options.Meter.Float64Histogram(instrument, metric.WithUnit("s"))
+	store, failure := options.open(scope)
+	if failure == nil {
+		return store, nil
+	}
+	if !options.damaged(failure) {
+		return Store{}, failure
+	}
+	if failure := options.quarantine(); failure != nil {
+		return Store{}, failure
+	}
+	return options.open(scope)
+}
 
+func (options Options) open(scope context.Context) (Store, error) {
+	latency, failure := options.Meter.Float64Histogram(instrument, metric.WithUnit("s"))
 	if failure != nil {
 		return Store{}, failure
 	}
-
 	settings := url.Values{}
 	settings.Add("_txlock", "immediate")
 	settings.Add("_pragma", "busy_timeout(2000)")
@@ -34,7 +45,6 @@ func New(scope context.Context, options Options) (Store, error) {
 	if failure != nil {
 		return Store{}, failure
 	}
-
 	handle.SetMaxOpenConns(1)
 	handle.SetMaxIdleConns(1)
 	handle.SetConnMaxLifetime(0)

@@ -1,6 +1,6 @@
 package bridge
 
-// Fault is a device-bridge application error surfaced only by kind; the raw sidecar message is never carried here (SEC-008).
+// Fault is a device-bridge application error surfaced only by kind; the raw sidecar message is never carried here.
 type Fault struct {
 	kind string
 }

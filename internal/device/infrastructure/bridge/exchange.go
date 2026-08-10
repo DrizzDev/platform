@@ -11,7 +11,7 @@ type ticket struct {
 }
 
 // exchange runs one multiplexed request/reply. On cancellation it drops the pending entry and sends $/cancel so the
-// sidecar can abort; a late reply is discarded (REL-001).
+// sidecar can abort; a late reply is discarded.
 func (session *session) exchange(scope context.Context, request Request) (Response, error) {
 	id := session.sequence.Add(1)
 	waiter := make(chan answer, 1)
