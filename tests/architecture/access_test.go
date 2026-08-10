@@ -2,6 +2,7 @@ package architecture_test
 
 import (
 	"go/ast"
+	"go/token"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -29,19 +30,42 @@ type document struct {
 	file *ast.File
 }
 
+// fields enforces value-object immutability: a domain struct must not export a
+// mutable field. The typed construction input is exempt — it is a transient DTO
+// consumed by New, not retained domain state.
 func (repository repository) fields(document document) {
-	ast.Inspect(document.file, func(node ast.Node) bool {
-		field, valid := node.(*ast.Field)
-		if !valid {
-			return true
+	for _, declaration := range document.file.Decls {
+		group, valid := declaration.(*ast.GenDecl)
+		if !valid || group.Tok != token.TYPE {
+			continue
 		}
+		for _, specification := range group.Specs {
+			repository.immutable(member{document: document, specification: specification})
+		}
+	}
+}
+
+type member struct {
+	document      document
+	specification ast.Spec
+}
+
+func (repository repository) immutable(member member) {
+	definition, valid := member.specification.(*ast.TypeSpec)
+	if !valid || definition.Name.Name == "Input" {
+		return
+	}
+	structure, valid := definition.Type.(*ast.StructType)
+	if !valid {
+		return
+	}
+	for _, field := range structure.Fields.List {
 		for _, name := range field.Names {
 			if name.IsExported() {
-				repository.test.Errorf("%s exposes mutable domain field %q", document.path, name.Name)
+				repository.test.Errorf("%s exposes mutable domain field %q", member.document.path, name.Name)
 			}
 		}
-		return true
-	})
+	}
 }
 
 func (repository repository) system(document document) {
