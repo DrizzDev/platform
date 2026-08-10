@@ -24,6 +24,11 @@ func (digest Digest) Empty() bool {
 	return digest.value == ""
 }
 
+// Same reports whether both digests are present and equal, so a shared content fingerprint can infer a match.
+func (digest Digest) Same(other Digest) bool {
+	return !digest.Empty() && digest == other
+}
+
 func (digest Digest) validate() error {
 	if len(digest.value) != 64 {
 		return errors.New("digest must be 64 hex characters")

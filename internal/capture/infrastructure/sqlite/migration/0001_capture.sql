@@ -20,3 +20,23 @@ CREATE TABLE lease (
     trace TEXT    PRIMARY KEY,
     until INTEGER NOT NULL
 ) STRICT;
+
+CREATE TABLE pending (
+    id          INTEGER PRIMARY KEY,
+    session     TEXT    NOT NULL,
+    turn        TEXT    NOT NULL,
+    call        TEXT    NOT NULL,
+    connection  TEXT    NOT NULL,
+    execution   TEXT    NOT NULL,
+    capability  TEXT    NOT NULL,
+    fingerprint TEXT    NOT NULL,
+    process     TEXT    NOT NULL,
+    ordinal     INTEGER NOT NULL,
+    moment      INTEGER NOT NULL,
+    origin      TEXT    NOT NULL,
+    fidelity    TEXT    NOT NULL,
+    category    TEXT    NOT NULL,
+    payload     BLOB    NOT NULL
+) STRICT;
+
+CREATE INDEX pending_moment ON pending (moment);

@@ -64,9 +64,14 @@ func (execution *Execution) Record(scope context.Context, note Note) {
 		return
 	}
 
+	stamp := note.Mark
+	if !stamp.Valid() {
+		stamp = mark.Exact
+	}
+
 	link, failure := correlation.New(correlation.Input{
 		Span:     hop,
-		Mark:     mark.Exact,
+		Mark:     stamp,
 		Parent:   execution.root,
 		Trace:    execution.trace,
 		Sequence: execution.sequence.Add(1),

@@ -31,6 +31,11 @@ func (identifier Identifier) Empty() bool {
 	return identifier.value == ""
 }
 
+// Same reports whether both identifiers are present and equal — the basis of an exact cross-source match.
+func (identifier Identifier) Same(other Identifier) bool {
+	return !identifier.Empty() && identifier == other
+}
+
 func (identifier Identifier) validate() error {
 	switch {
 	case identifier.value == "":

@@ -149,7 +149,41 @@ floor and is never deleted.
   the courier's credential provider (Slice 4b) and construct the notifier and the
   janitor loop. No `cmd` wiring exists yet.
 
-## 9. Verification
+## 9. Slice 6 — correlation matching and the bounded pending window
+
+Host hooks and MCP see different parts of one execution; the capture layer
+associates a host observation with the Drizz capability call it belongs to, then
+activates it into that execution. Unmatched host data expires locally and is
+never synchronized (`capture.md` §10, §11).
+
+- **Domain `affinity`.** `bearings.Shares` (any of the six dimensions present and
+  equal), and `Signal.Match` — exact on a shared identifier, otherwise inferred
+  when an earlier observation is within the call's window and agrees on normalized
+  input or process, otherwise no match. Pure; time is passed in, never read.
+  `identifier.Same` and `digest.Same` express the value-object equality the match
+  needs. The mark is carried honestly: inferred is never relabelled exact.
+- **Ephemeral `pending` table** (folded into `0001`, never synchronized). Bounded
+  by a time-to-live and a capacity. Its columns derive from the same generic
+  `layout` the journal uses, so its insert, select, and scan cannot drift.
+- **Application `lobby`.** `Observe` holds an observation and expires the stale;
+  `Activate` matches a `Call` against the live window, returns the claimed
+  observations tagged exact or inferred, and evicts them so each activates at most
+  once. The lobby matches and evicts; the caller records the claims into the
+  activated execution, so the lobby does not depend on recording.
+- **Recording** carries the mark: `Note` gains a mark that defaults to exact, so a
+  direct capability record is unchanged and an inferred match records as inferred.
+- **Host adapters deferred (Stage 6).** No host adapter exists yet, so real
+  per-adapter and real-client fixtures ride with each integration. This slice
+  ships the host-neutral engine with synthetic fixtures for exact, inferred,
+  missing, duplicate, delayed, and out-of-order events.
+
+Stage 5 is closed end to end: `tests/capture` drives one observation through the
+whole stack — held in the window, claimed by a call, recorded, synchronized to a
+fake cloud, then reclaimed once acknowledged. The composition root wiring (the
+identity-backed credential provider, the notifier, and the observe/activate/loop
+schedule) lands with the device tool in Stage 6.
+
+## 10. Verification
 
 Platform general gate: `make verify`. Later slices add the ADR 0004 persistence
 qualification (crash, corruption, disk-full, duplicate-process, migration,

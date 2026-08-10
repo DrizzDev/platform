@@ -15,12 +15,14 @@ func (store Store) Settled(scope context.Context) ([]journal.Retained, error) {
 
 	failure := store.observe(scope, probe{name: "settled", work: func(scope context.Context) error {
 		rows, failure := store.handle.QueryContext(scope,
-			"SELECT "+columns+", stamped FROM journal WHERE state = ? ORDER BY id", journal.Synced.String())
+			"SELECT "+entries.columns()+", stamped FROM journal WHERE state = ? ORDER BY id", journal.Synced.String())
 		if failure != nil {
 			return failure
 		}
+
 		defer func() { _ = rows.Close() }()
 		gathered, failure := store.aged(rows)
+
 		if failure != nil {
 			return failure
 		}
@@ -32,20 +34,23 @@ func (store Store) Settled(scope context.Context) ([]journal.Retained, error) {
 
 func (Store) aged(rows *sql.Rows) ([]journal.Retained, error) {
 	var retained []journal.Retained
+
 	for rows.Next() {
 		var line row
 		var stamped int64
-		if failure := rows.Scan(append(line.targets(), &stamped)...); failure != nil {
+
+		if failure := rows.Scan(append(entries.targets(&line), &stamped)...); failure != nil {
 			return nil, failure
 		}
 		entry, failure := line.entry()
 		if failure != nil {
 			return nil, failure
 		}
+
 		link := entry.Correlation()
 		retained = append(retained, journal.Retained{
-			Trace:    link.Trace(),
 			Span:     link.Span(),
+			Trace:    link.Trace(),
 			Category: entry.Category(),
 			Recorded: time.Unix(stamped, 0),
 		})

@@ -33,6 +33,17 @@ func New(input Input) Bearings {
 	}
 }
 
+// Shares reports whether any identity dimension is present and equal in both, the authoritative link that makes a
+// correlation exact rather than inferred.
+func (bearings Bearings) Shares(other Bearings) bool {
+	return bearings.session.Same(other.session) ||
+		bearings.turn.Same(other.turn) ||
+		bearings.call.Same(other.call) ||
+		bearings.connection.Same(other.connection) ||
+		bearings.execution.Same(other.execution) ||
+		bearings.capability.Same(other.capability)
+}
+
 func (bearings Bearings) Session() identifier.Identifier    { return bearings.session }
 func (bearings Bearings) Turn() identifier.Identifier       { return bearings.turn }
 func (bearings Bearings) Call() identifier.Identifier       { return bearings.call }

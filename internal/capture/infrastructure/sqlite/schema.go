@@ -1,20 +1,9 @@
 package sqlite
 
-import (
-	"strings"
+import "github.com/DrizzDev/platform/internal/capture/application/journal"
 
-	"github.com/DrizzDev/platform/internal/capture/application/journal"
-)
-
-// column binds a journal column to how its value is written from an entry and read back into a row.
-// The insert, the select, and the scan all derive from the one ordered layout below, so their column order can never drift apart.
-type column struct {
-	name  string
-	read  func(*row) any
-	write func(journal.Entry) any
-}
-
-var layout = []column{
+// entries is the ordered layout of the journal table.
+var entries = layout[journal.Entry, row]{
 	{
 		name:  "trace",
 		read:  func(row *row) any { return &row.trace },
@@ -70,30 +59,4 @@ var layout = []column{
 		read:  func(row *row) any { return &row.state },
 		write: func(entry journal.Entry) any { return entry.State().String() },
 	},
-}
-
-var columns = func() string {
-	names := make([]string, len(layout))
-	for index, column := range layout {
-		names[index] = column.name
-	}
-	return strings.Join(names, ", ")
-}()
-
-var placeholders = strings.TrimSuffix(strings.Repeat("?, ", len(layout)), ", ")
-
-func (Store) values(entry journal.Entry) []any {
-	values := make([]any, len(layout))
-	for index, column := range layout {
-		values[index] = column.write(entry)
-	}
-	return values
-}
-
-func (row *row) targets() []any {
-	targets := make([]any, len(layout))
-	for index, column := range layout {
-		targets[index] = column.read(row)
-	}
-	return targets
 }

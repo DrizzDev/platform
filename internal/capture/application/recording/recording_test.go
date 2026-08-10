@@ -19,6 +19,7 @@ import (
 	"github.com/DrizzDev/platform/internal/capture/domain/category"
 	"github.com/DrizzDev/platform/internal/capture/domain/digest"
 	"github.com/DrizzDev/platform/internal/capture/domain/fidelity"
+	"github.com/DrizzDev/platform/internal/capture/domain/mark"
 	"github.com/DrizzDev/platform/internal/capture/domain/origin"
 	"github.com/DrizzDev/platform/internal/capture/infrastructure/artifact"
 	"github.com/DrizzDev/platform/internal/capture/infrastructure/sqlite"
@@ -114,6 +115,37 @@ func TestLeaseProtectsRun(test *testing.T) {
 	}
 	if len(claims) != 1 || claims[0].Trace.String() != execution.Trace().String() {
 		test.Fatalf("recording did not lease the running trace, claims = %d", len(claims))
+	}
+}
+
+func TestMark(test *testing.T) {
+	test.Parallel()
+
+	recorder, store, _ := fixture{test: test}.build()
+	execution, failure := recorder.Begin()
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	scope := context.Background()
+	execution.Record(scope, recording.Note{
+		Origin: origin.Host, Fidelity: fidelity.Inferred, Category: category.Prompt, Payload: []byte("direct"),
+	})
+	execution.Record(scope, recording.Note{
+		Origin: origin.Host, Fidelity: fidelity.Inferred, Category: category.Prompt, Payload: []byte("matched"), Mark: mark.Inferred,
+	})
+
+	entries, failure := store.Read(scope, execution.Trace())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if len(entries) != 2 {
+		test.Fatalf("recorded %d entries", len(entries))
+	}
+	if entries[0].Correlation().Mark() != mark.Exact {
+		test.Fatal("an unset mark must default to exact")
+	}
+	if entries[1].Correlation().Mark() != mark.Inferred {
+		test.Fatal("an inferred note must record as inferred")
 	}
 }
 

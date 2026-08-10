@@ -18,11 +18,11 @@ import (
 // Read returns every entry for a trace in recorded order, reconstructing each into a validated value. A row that cannot
 // be reconstructed is a corruption and fails the read rather than yielding a partial value.
 func (store Store) Read(scope context.Context, subject trace.Trace) ([]journal.Entry, error) {
-	var entries []journal.Entry
+	var records []journal.Entry
 
 	failure := store.observe(scope, probe{name: "read", work: func(scope context.Context) error {
 		rows, failure := store.handle.QueryContext(scope,
-			"SELECT "+columns+" FROM journal WHERE trace = ? ORDER BY id", subject.String())
+			"SELECT "+entries.columns()+" FROM journal WHERE trace = ? ORDER BY id", subject.String())
 		if failure != nil {
 			return failure
 		}
@@ -31,26 +31,26 @@ func (store Store) Read(scope context.Context, subject trace.Trace) ([]journal.E
 		if failure != nil {
 			return failure
 		}
-		entries = gathered
+		records = gathered
 		return nil
 	}})
-	return entries, failure
+	return records, failure
 }
 
 func (Store) collect(rows *sql.Rows) ([]journal.Entry, error) {
-	var entries []journal.Entry
+	var records []journal.Entry
 	for rows.Next() {
 		var line row
-		if failure := rows.Scan(line.targets()...); failure != nil {
+		if failure := rows.Scan(entries.targets(&line)...); failure != nil {
 			return nil, failure
 		}
 		entry, failure := line.entry()
 		if failure != nil {
 			return nil, failure
 		}
-		entries = append(entries, entry)
+		records = append(records, entry)
 	}
-	return entries, rows.Err()
+	return records, rows.Err()
 }
 
 type row struct {
