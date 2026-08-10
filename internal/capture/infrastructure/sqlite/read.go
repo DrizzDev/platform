@@ -6,6 +6,7 @@ import (
 	"github.com/DrizzDev/platform/internal/capture/application/journal"
 	"github.com/DrizzDev/platform/internal/capture/domain/category"
 	"github.com/DrizzDev/platform/internal/capture/domain/correlation"
+	"github.com/DrizzDev/platform/internal/capture/domain/digest"
 	"github.com/DrizzDev/platform/internal/capture/domain/fidelity"
 	"github.com/DrizzDev/platform/internal/capture/domain/mark"
 	"github.com/DrizzDev/platform/internal/capture/domain/origin"
@@ -20,7 +21,7 @@ func (store Store) Read(scope context.Context, subject trace.Trace) ([]journal.E
 
 	failure := store.observe(scope, probe{name: "read", work: func(scope context.Context) error {
 		rows, failure := store.handle.QueryContext(scope,
-			"SELECT span, parent, sequence, mark, origin, fidelity, category, payload, state "+
+			"SELECT span, parent, sequence, mark, origin, fidelity, category, payload, artifact, state "+
 				"FROM journal WHERE trace = ? ORDER BY id", subject.String())
 
 		if failure != nil {
@@ -31,7 +32,7 @@ func (store Store) Read(scope context.Context, subject trace.Trace) ([]journal.E
 		for rows.Next() {
 			var line row
 			if failure := rows.Scan(&line.span, &line.parent, &line.sequence, &line.mark,
-				&line.origin, &line.fidelity, &line.category, &line.payload, &line.state); failure != nil {
+				&line.origin, &line.fidelity, &line.category, &line.payload, &line.artifact, &line.state); failure != nil {
 				return failure
 			}
 			entry, failure := line.entry(subject)
@@ -54,6 +55,7 @@ type row struct {
 	origin   string
 	fidelity string
 	category string
+	artifact string
 	state    string
 }
 
@@ -79,9 +81,18 @@ func (row row) entry(subject trace.Trace) (journal.Entry, error) {
 		return journal.Entry{}, Corrupt{}
 	}
 
+	reference := digest.Digest{}
+	if row.artifact != "" {
+		reference, failure = digest.New(row.artifact)
+		if failure != nil {
+			return journal.Entry{}, Corrupt{}
+		}
+	}
+
 	entry, failure := journal.New(journal.Input{
 		Correlation: link,
 		Payload:     row.payload,
+		Artifact:    reference,
 		State:       journal.State(row.state),
 		Origin:      origin.Origin(row.origin),
 		Fidelity:    fidelity.Fidelity(row.fidelity),

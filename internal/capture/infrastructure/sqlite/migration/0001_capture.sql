@@ -9,6 +9,7 @@ CREATE TABLE journal (
     fidelity TEXT    NOT NULL,
     category TEXT    NOT NULL,
     payload  BLOB    NOT NULL,
+    artifact TEXT    NOT NULL DEFAULT '',
     state    TEXT    NOT NULL,
     stamped  INTEGER NOT NULL
 ) STRICT;

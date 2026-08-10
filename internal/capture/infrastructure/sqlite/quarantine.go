@@ -9,8 +9,8 @@ import (
 	driver "modernc.org/sqlite"
 )
 
-// malformed and foreign are the SQLite result codes for a database that cannot be trusted — a corrupt image and a file
-// that is not a database. The code is masked to its primary byte to catch extended variants.
+// malformed and foreign are the SQLite result codes for an untrusted database: a corrupt image and a file that is not
+// a database. The code is masked to its primary byte to catch extended variants.
 const (
 	malformed = 11
 	foreign   = 26

@@ -5,36 +5,43 @@ import (
 
 	"github.com/DrizzDev/platform/internal/capture/domain/category"
 	"github.com/DrizzDev/platform/internal/capture/domain/correlation"
+	"github.com/DrizzDev/platform/internal/capture/domain/digest"
 	"github.com/DrizzDev/platform/internal/capture/domain/fidelity"
 	"github.com/DrizzDev/platform/internal/capture/domain/origin"
 )
 
 // Entry is one durable record in the execution journal: where it sits in the trace, what it is, how truthful it is,
-// its classified payload, and its synchronization state.
+// its classified payload, an optional reference to a stored artifact, and its synchronization state.
 type Entry struct {
-	state       State
-	payload     []byte
 	origin      origin.Origin
 	fidelity    fidelity.Fidelity
 	category    category.Category
 	correlation correlation.Correlation
+
+	state    State
+	payload  []byte
+	artifact digest.Digest
 }
 
 type Input struct {
-	State       State
-	Payload     []byte
 	Origin      origin.Origin
 	Fidelity    fidelity.Fidelity
 	Category    category.Category
 	Correlation correlation.Correlation
+
+	State    State
+	Payload  []byte
+	Artifact digest.Digest
 }
 
 func New(input Input) (Entry, error) {
 	entry := Entry{
+
 		state:       input.State,
 		origin:      input.Origin,
 		fidelity:    input.Fidelity,
 		category:    input.Category,
+		artifact:    input.Artifact,
 		correlation: input.Correlation,
 		payload:     append([]byte(nil), input.Payload...),
 	}
@@ -62,6 +69,10 @@ func (entry Entry) Category() category.Category {
 
 func (entry Entry) Payload() []byte {
 	return append([]byte(nil), entry.payload...)
+}
+
+func (entry Entry) Artifact() digest.Digest {
+	return entry.artifact
 }
 
 func (entry Entry) State() State {
