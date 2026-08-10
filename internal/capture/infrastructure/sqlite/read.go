@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/DrizzDev/platform/internal/capture/application/journal"
 	"github.com/DrizzDev/platform/internal/capture/domain/category"
@@ -21,34 +22,41 @@ func (store Store) Read(scope context.Context, subject trace.Trace) ([]journal.E
 
 	failure := store.observe(scope, probe{name: "read", work: func(scope context.Context) error {
 		rows, failure := store.handle.QueryContext(scope,
-			"SELECT span, parent, sequence, mark, origin, fidelity, category, payload, artifact, state "+
-				"FROM journal WHERE trace = ? ORDER BY id", subject.String())
-
+			"SELECT "+columns+" FROM journal WHERE trace = ? ORDER BY id", subject.String())
 		if failure != nil {
 			return failure
 		}
 		defer func() { _ = rows.Close() }()
-
-		for rows.Next() {
-			var line row
-			if failure := rows.Scan(&line.span, &line.parent, &line.sequence, &line.mark,
-				&line.origin, &line.fidelity, &line.category, &line.payload, &line.artifact, &line.state); failure != nil {
-				return failure
-			}
-			entry, failure := line.entry(subject)
-			if failure != nil {
-				return failure
-			}
-			entries = append(entries, entry)
+		gathered, failure := store.collect(rows)
+		if failure != nil {
+			return failure
 		}
-		return rows.Err()
+		entries = gathered
+		return nil
 	}})
 	return entries, failure
+}
+
+func (Store) collect(rows *sql.Rows) ([]journal.Entry, error) {
+	var entries []journal.Entry
+	for rows.Next() {
+		var line row
+		if failure := rows.Scan(line.targets()...); failure != nil {
+			return nil, failure
+		}
+		entry, failure := line.entry()
+		if failure != nil {
+			return nil, failure
+		}
+		entries = append(entries, entry)
+	}
+	return entries, rows.Err()
 }
 
 type row struct {
 	sequence int64
 	payload  []byte
+	trace    string
 	span     string
 	parent   string
 	mark     string
@@ -59,7 +67,11 @@ type row struct {
 	state    string
 }
 
-func (row row) entry(subject trace.Trace) (journal.Entry, error) {
+func (row row) entry() (journal.Entry, error) {
+	thread, failure := trace.New(row.trace)
+	if failure != nil {
+		return journal.Entry{}, Corrupt{}
+	}
 	here, failure := span.New(row.span)
 
 	if failure != nil {
@@ -75,7 +87,7 @@ func (row row) entry(subject trace.Trace) (journal.Entry, error) {
 	}
 
 	link, failure := correlation.New(correlation.Input{
-		Trace: subject, Span: here, Parent: above, Sequence: row.sequence, Mark: mark.Mark(row.mark),
+		Trace: thread, Span: here, Parent: above, Sequence: row.sequence, Mark: mark.Mark(row.mark),
 	})
 	if failure != nil {
 		return journal.Entry{}, Corrupt{}
