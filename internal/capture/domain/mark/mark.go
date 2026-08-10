@@ -1,6 +1,7 @@
 package mark
 
-// Mark records whether a correlation link is directly observed or inferred, so an inferred relationship is never presented as exact.
+// Mark records whether a correlation link is directly observed or inferred,
+// so an inferred relationship is never. presented as exact.
 type Mark string
 
 const (

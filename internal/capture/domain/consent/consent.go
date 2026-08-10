@@ -6,7 +6,8 @@ import (
 	"github.com/DrizzDev/platform/internal/capture/domain/category"
 )
 
-// Consent is the set of data categories the user approved for capture. A category outside the set is never captured or uploaded.
+// Consent is the set of data categories the user approved for capture.
+// A category outside the set is never captured or uploaded.
 type Consent struct {
 	approved map[category.Category]bool
 }
