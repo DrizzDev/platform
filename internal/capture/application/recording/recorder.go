@@ -17,6 +17,15 @@ type Recorder struct {
 	lease  time.Duration
 }
 
-func (recorder Recorder) drop(scope context.Context, step string) {
-	recorder.logger.WarnContext(scope, "capture.record.dropped", slog.String("step", step))
+// slip is a dropped record: which step failed and why. The recorder logs it and swallows it, so the reason a record
+// was dropped is observable — a missing payload, for instance, is not mistaken for a storage fault — without ever
+// surfacing to the capability being recorded.
+type slip struct {
+	reason error
+	step   string
+}
+
+func (recorder Recorder) drop(scope context.Context, slip slip) {
+	recorder.logger.WarnContext(scope, "capture.record.dropped",
+		slog.String("step", slip.step), slog.Any("error", slip.reason))
 }

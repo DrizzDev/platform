@@ -107,7 +107,9 @@ func TestLeaseProtectsRun(test *testing.T) {
 		test.Fatal(failure)
 	}
 	scope := context.Background()
-	execution.Record(scope, recording.Note{Origin: origin.Capability, Fidelity: fidelity.Exact, Category: category.Log})
+	execution.Record(scope, recording.Note{
+		Origin: origin.Capability, Fidelity: fidelity.Exact, Category: category.Log, Payload: []byte("step"),
+	})
 
 	claims, failure := store.Leases(scope)
 	if failure != nil {
@@ -146,6 +148,28 @@ func TestMark(test *testing.T) {
 	}
 	if entries[1].Correlation().Mark() != mark.Inferred {
 		test.Fatal("an inferred note must record as inferred")
+	}
+}
+
+func TestMissingPayload(test *testing.T) {
+	test.Parallel()
+
+	var log bytes.Buffer
+	recorder, failure := recording.New(recording.Options{
+		Writer: breaker{}, Sink: breaker{}, Keeper: breaker{}, Clock: clock{},
+		Logger: slog.New(slog.NewJSONHandler(&log, nil)), Lease: time.Minute,
+	})
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	execution, failure := recorder.Begin()
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	execution.Record(context.Background(), recording.Note{Origin: origin.Host, Fidelity: fidelity.Exact, Category: category.Prompt})
+
+	if !strings.Contains(log.String(), "entry payload is required") {
+		test.Fatal("a missing payload must be observable, not silently dropped or mistaken for a store fault")
 	}
 }
 

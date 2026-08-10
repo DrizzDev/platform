@@ -116,6 +116,7 @@ func (fixture fixture) entry(spec spec) journal.Entry {
 		Origin:      origin.Capability,
 		Fidelity:    fidelity.Exact,
 		Category:    category.Tool,
+		Payload:     []byte("payload"),
 		Artifact:    reference,
 		State:       journal.Pending,
 	})

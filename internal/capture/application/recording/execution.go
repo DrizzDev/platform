@@ -54,13 +54,13 @@ func (execution *Execution) Record(scope context.Context, note Note) {
 
 	value, failure := execution.recorder.mint()
 	if failure != nil {
-		execution.recorder.drop(scope, "span")
+		execution.recorder.drop(scope, slip{step: "span", reason: failure})
 		return
 	}
 
 	hop, failure := span.New(value)
 	if failure != nil {
-		execution.recorder.drop(scope, "span")
+		execution.recorder.drop(scope, slip{step: "span", reason: failure})
 		return
 	}
 
@@ -77,13 +77,13 @@ func (execution *Execution) Record(scope context.Context, note Note) {
 		Sequence: execution.sequence.Add(1),
 	})
 	if failure != nil {
-		execution.recorder.drop(scope, "correlation")
+		execution.recorder.drop(scope, slip{step: "correlation", reason: failure})
 		return
 	}
 
 	reference, failure := execution.store(scope, note.Artifact)
 	if failure != nil {
-		execution.recorder.drop(scope, "artifact")
+		execution.recorder.drop(scope, slip{step: "artifact", reason: failure})
 		return
 	}
 
@@ -97,11 +97,11 @@ func (execution *Execution) Record(scope context.Context, note Note) {
 		State:       journal.Pending,
 	})
 	if failure != nil {
-		execution.recorder.drop(scope, "entry")
+		execution.recorder.drop(scope, slip{step: "entry", reason: failure})
 		return
 	}
 	if failure := execution.recorder.writer.Append(scope, entry); failure != nil {
-		execution.recorder.drop(scope, "append")
+		execution.recorder.drop(scope, slip{step: "append", reason: failure})
 	}
 }
 
@@ -112,7 +112,7 @@ func (execution *Execution) renew(scope context.Context) {
 
 	claim := journal.Claim{Trace: execution.trace, Until: deadline}
 	if failure := execution.recorder.keeper.Lease(scope, claim); failure != nil {
-		execution.recorder.drop(scope, "lease")
+		execution.recorder.drop(scope, slip{step: "lease", reason: failure})
 	}
 }
 

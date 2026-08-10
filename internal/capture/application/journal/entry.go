@@ -91,6 +91,8 @@ func (entry Entry) validate() error {
 		return errors.New("entry category is invalid")
 	case !entry.state.Valid():
 		return errors.New("entry state is invalid")
+	case len(entry.payload) == 0:
+		return errors.New("entry payload is required")
 	default:
 		return nil
 	}
