@@ -2,13 +2,9 @@
 
 Status: Approved
 
-Architecture Decision Records, or ADRs, preserve why the platform is built a
-certain way. They prevent future contributors from treating an old choice as an
-accident or repeating the same research.
+Architecture Decision Records, or ADRs, preserve why the platform is built a certain way. They prevent future contributors from treating an old choice as an accident or repeating the same research.
 
-This directory exists because the project requires an audit trail for material
-technical decisions. It does not store meeting notes, routine implementation
-choices, task history, or agent reasoning.
+This directory exists because the project requires an audit trail for material technical decisions. It does not store meeting notes, routine implementation choices, task history, or agent reasoning.
 
 ## Statuses
 
@@ -18,13 +14,11 @@ choices, task history, or agent reasoning.
 - `rejected`: considered and not selected;
 - `deprecated`: still present but scheduled for removal.
 
-Only the repository owner or an explicitly delegated technical owner changes a
-proposal to accepted.
+Only the repository owner or an explicitly delegated technical owner changes a proposal to accepted.
 
 ## When an ADR is required
 
-Create an ADR only for a durable decision that would be expensive or risky to
-reverse, including:
+Create an ADR only for a durable decision that would be expensive or risky to reverse, including:
 
 - architecture or module boundaries;
 - language or framework;
@@ -35,8 +29,7 @@ reverse, including:
 - a foundational third-party dependency;
 - a deliberate exception to the engineering guide.
 
-Do not create an ADR for a local refactor, a self-explanatory bug fix, a normal
-library addition, a task plan, or a reversible implementation detail.
+Do not create an ADR for a local refactor, a self-explanatory bug fix, a normal library addition, a task plan, or a reversible implementation detail.
 
 ## Workflow
 
@@ -45,11 +38,9 @@ library addition, a task plan, or a reversible implementation detail.
 3. Mark it `proposed`.
 4. Link evidence, experiments, and affected documents.
 5. Obtain review from the actual owners of the affected boundaries.
-6. Record the decision date and mark it `accepted`, `rejected`, or leave it
-   `proposed`.
+6. Record the decision date and mark it `accepted`, `rejected`, or leave it `proposed`.
 7. Update this index and the affected architecture documents.
-8. If the decision changes later, add a new ADR and mark the old one
-   `superseded`; do not rewrite history.
+8. If the decision changes later, add a new ADR and mark the old one `superseded`; do not rewrite history.
 
 ## Index
 

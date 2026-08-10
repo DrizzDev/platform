@@ -2,8 +2,7 @@
 
 Status: Approved supporting evidence
 
-Reference implementations inform design choices but do not define Drizz
-behavior, architecture, naming, or security policy.
+Reference implementations inform design choices but do not define Drizz behavior, architecture, naming, or security policy.
 
 ## Reference implementations
 
@@ -19,25 +18,13 @@ behavior, architecture, naming, or security policy.
 | [OpenInference](https://github.com/Arize-ai/openinference) | Standard AI trace vocabulary and SDK instrumentation across supported languages |
 | [Neatlogs](https://github.com/neatlogs/neatlogs) | Provider SDK wrapping, exposed-thinking capture, tool correlation, and OTLP export |
 
-The recurring pattern is a transport-neutral behavior layer with thin MCP
-registration. For local standard-input/output integrations, the MCP client
-starts and supervises the configured process. Remote HTTP is a separate
-deployment and authentication model.
+The recurring pattern is a transport-neutral behavior layer with thin MCP registration. For local standard-input/output integrations, the MCP client starts and supervises the configured process. Remote HTTP is a separate deployment and authentication model.
 
-No reference source is copied into this repository without a separate license,
-security, maintenance, and fit review.
+No reference source is copied into this repository without a separate license, security, maintenance, and fit review.
 
-The agent-observability references do not provide the Drizz product boundary.
-The primary Drizz journey uses official host integrations and a Drizz-owned
-execution record. `coding-harness-tracing` and Neatlogs are not installed on
-customer machines. OpenInference is deferred to a future SDK integration and
-would remain behind an adapter.
+The agent-observability references do not provide the Drizz product boundary. The primary Drizz journey uses official host integrations and a Drizz-owned execution record. `coding-harness-tracing` and Neatlogs are not installed on customer machines. OpenInference is deferred to a future SDK integration and would remain behind an adapter.
 
-OpenInference currently provides Go semantic conventions, shared
-instrumentation utilities, and OpenAI and Anthropic Go SDK instrumentors. It
-does not provide Go adapters for Claude Code, Codex, Gemini CLI, or their
-desktop applications. Those external hosts require their official plugin,
-hook, transcript, or structured-event surfaces regardless of language.
+OpenInference currently provides Go semantic conventions, shared instrumentation utilities, and OpenAI and Anthropic Go SDK instrumentors. It does not provide Go adapters for Claude Code, Codex, Gemini CLI, or their desktop applications. Those external hosts require their official plugin, hook, transcript, or structured-event surfaces regardless of language.
 
 ## Primary sources
 
@@ -73,5 +60,4 @@ A design claim derived from source code must record:
 - the observed behavior;
 - the limitation of the comparison.
 
-Personal filesystem paths, private workstation layout, and uncommitted local
-clones must never appear as shared evidence.
+Personal filesystem paths, private workstation layout, and uncommitted local clones must never appear as shared evidence.
