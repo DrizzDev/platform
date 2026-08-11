@@ -9,13 +9,15 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/DrizzDev/platform/internal/capability/application/operator"
+	"github.com/DrizzDev/platform/internal/capability/domain/catalog"
 	"github.com/DrizzDev/platform/internal/platform/filesystem"
 )
 
 func (command Command) screenshot(scope context.Context) *cobra.Command {
+	entry, _ := catalog.New().Lookup(catalog.Screenshot)
 	return &cobra.Command{
-		Use:   "screenshot <serial>",
-		Short: "Capture the screen of a connected device",
+		Use:   command.slug(entry.Title()) + " <serial>",
+		Short: entry.Summary(),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(root *cobra.Command, arguments []string) error {
 			shot, failure := command.options.Perform.Screenshot(scope, operator.Target{Serial: arguments[0]})

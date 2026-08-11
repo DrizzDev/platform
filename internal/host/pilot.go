@@ -47,6 +47,14 @@ func (pilot pilot) Devices(scope context.Context) (operator.Roster, error) {
 	return engine.Devices(scope)
 }
 
+func (pilot pilot) Tap(scope context.Context, contact operator.Contact) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Tap(scope, contact)
+}
+
 // station assembles the device runtime once and holds it for reuse. Assembly is single-flight; its result — the
 // operator, or the reason it is unavailable — is kept for the life of the connection, and close tears the runtime down.
 type station struct {

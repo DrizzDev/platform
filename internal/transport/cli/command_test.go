@@ -47,6 +47,10 @@ func (performer performer) Devices(context.Context) (operator.Roster, error) {
 	return performer.roster, performer.fail
 }
 
+func (performer performer) Tap(context.Context, operator.Contact) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
 func (run runner) Run(scope context.Context) error {
 	return run(scope)
 }
@@ -227,7 +231,7 @@ func TestScreenshot(test *testing.T) {
 
 	var output bytes.Buffer
 	command, failure := cli.New(fixture{
-		arguments: []string{"screenshot", "s-1"},
+		arguments: []string{"take-screenshot", "s-1"},
 		output:    &output,
 		perform:   performer{shot: operator.Shot{Image: []byte("png-bytes"), Format: "PNG"}},
 	}.options())
@@ -256,7 +260,7 @@ func TestDevices(test *testing.T) {
 
 	var output bytes.Buffer
 	command, failure := cli.New(fixture{
-		arguments: []string{"devices"},
+		arguments: []string{"list-devices"},
 		output:    &output,
 		perform:   performer{roster: operator.Roster{Serials: []string{"s-1", "s-2"}}},
 	}.options())
@@ -275,7 +279,7 @@ func TestScreenshotRefused(test *testing.T) {
 	test.Parallel()
 
 	command, failure := cli.New(fixture{
-		arguments: []string{"screenshot", "s-9"},
+		arguments: []string{"take-screenshot", "s-9"},
 		output:    io.Discard,
 		perform:   performer{fail: operator.Refusal{Code: outcome.Missing}},
 	}.options())

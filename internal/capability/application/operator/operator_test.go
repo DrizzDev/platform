@@ -148,6 +148,26 @@ func TestScreenshot(test *testing.T) {
 	}
 }
 
+func TestTap(test *testing.T) {
+	test.Parallel()
+
+	kit := kit{test: test}
+	performed, store, _ := kit.build(bridge{devices: []device.Device{kit.device("s-1")}})
+	scope := context.Background()
+
+	if _, failure := performed.Tap(scope, operator.Contact{Serial: "s-1", X: 100, Y: 200}); failure != nil {
+		test.Fatal(failure)
+	}
+
+	recorded, failure := store.Pending(scope)
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if len(recorded) != 1 || recorded[0].Category() != category.Tool {
+		test.Fatalf("recorded %d entries, want one tool action", len(recorded))
+	}
+}
+
 func TestScreenshotUnknownDevice(test *testing.T) {
 	test.Parallel()
 

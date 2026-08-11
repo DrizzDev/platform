@@ -5,12 +5,15 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
+	"github.com/DrizzDev/platform/internal/capability/domain/catalog"
 )
 
 func (command Command) devices(scope context.Context) *cobra.Command {
+	entry, _ := catalog.New().Lookup(catalog.Devices)
 	return &cobra.Command{
-		Use:   "devices",
-		Short: "List the connected devices",
+		Use:   command.slug(entry.Title()),
+		Short: entry.Summary(),
 		Args:  cobra.NoArgs,
 		RunE: func(root *cobra.Command, arguments []string) error {
 			roster, failure := command.options.Perform.Devices(scope)

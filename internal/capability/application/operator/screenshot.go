@@ -3,7 +3,6 @@ package operator
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/DrizzDev/platform/internal/capability/domain/catalog"
 	"github.com/DrizzDev/platform/internal/capability/domain/outcome"
@@ -49,19 +48,16 @@ func (operator Operator) resolve(scope context.Context, value string) (device.De
 	return device.Device{}, Refusal{Code: outcome.Missing}
 }
 
-// record writes the capture as one observational execution entry. If the record cannot be opened, the drop is logged
-// and swallowed, so recording can never break the capability it observes but a lost record is never silent.
+// record writes the capture as one observational execution entry, with the screen image as its artifact.
 func (operator Operator) record(scope context.Context, frame capture.Capture) {
-	execution, failure := operator.recorder.Begin()
-	if failure != nil {
-		operator.logger.WarnContext(scope, "capability.record.dropped", slog.String("capability", catalog.Screenshot))
-		return
-	}
-	execution.Record(scope, recording.Note{
-		Origin:   origin.Capability,
-		Fidelity: fidelity.Exact,
-		Category: category.Screen,
-		Payload:  []byte(fmt.Sprintf("%dx%d", frame.Width(), frame.Height())),
-		Artifact: frame.Image().Bytes(),
+	operator.inscribe(scope, entry{
+		capability: catalog.Screenshot,
+		note: recording.Note{
+			Origin:   origin.Capability,
+			Fidelity: fidelity.Exact,
+			Category: category.Screen,
+			Payload:  []byte(fmt.Sprintf("%dx%d", frame.Width(), frame.Height())),
+			Artifact: frame.Image().Bytes(),
+		},
 	})
 }

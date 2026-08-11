@@ -5,6 +5,7 @@ package catalog
 const (
 	Devices    = "devices"
 	Screenshot = "screenshot"
+	Tap        = "tap"
 )
 
 // Catalog is the single, ordered list of the capabilities Drizz offers. The command line and the agent connection both
@@ -17,13 +18,25 @@ func New() Catalog {
 	return Catalog{entries: []Entry{
 		{
 			name:    Devices,
+			title:   "ListDevices",
 			summary: "List the devices currently connected to this computer.",
 		},
 		{
 			name:    Screenshot,
+			title:   "TakeScreenshot",
 			summary: "Capture the current screen of a connected device.",
 			parameters: []Parameter{
 				{name: "serial", summary: "The serial of the device to capture."},
+			},
+		},
+		{
+			name:    Tap,
+			title:   "Tap",
+			summary: "Tap the screen of a connected device at a point.",
+			parameters: []Parameter{
+				{name: "serial", summary: "The serial of the device to tap."},
+				{name: "x", summary: "The horizontal coordinate to tap, in pixels."},
+				{name: "y", summary: "The vertical coordinate to tap, in pixels."},
 			},
 		},
 	}}

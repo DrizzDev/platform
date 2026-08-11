@@ -24,6 +24,7 @@ func (command Command) root(scope context.Context) *cobra.Command {
 	root.AddCommand(command.logout(scope))
 	root.AddCommand(command.screenshot(scope))
 	root.AddCommand(command.devices(scope))
+	root.AddCommand(command.tap(scope))
 
 	return root
 }

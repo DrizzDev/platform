@@ -15,7 +15,7 @@ func TestScreenshotUnprepared(test *testing.T) {
 
 	var diagnostics bytes.Buffer
 	process, failure := host.New(host.Options{
-		Arguments: []string{"screenshot", "s-1"},
+		Arguments: []string{"take-screenshot", "s-1"},
 		Streams: host.Streams{
 			Input:   io.NopCloser(strings.NewReader("")),
 			Output:  io.Discard,
@@ -38,7 +38,7 @@ func TestDevicesUnprepared(test *testing.T) {
 
 	var diagnostics bytes.Buffer
 	process, failure := host.New(host.Options{
-		Arguments: []string{"devices"},
+		Arguments: []string{"list-devices"},
 		Streams: host.Streams{
 			Input:   io.NopCloser(strings.NewReader("")),
 			Output:  io.Discard,

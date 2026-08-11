@@ -14,6 +14,7 @@ import (
 
 	"github.com/DrizzDev/platform/internal/application/release"
 	"github.com/DrizzDev/platform/internal/capability/application/operator"
+	"github.com/DrizzDev/platform/internal/capability/domain/catalog"
 	"github.com/DrizzDev/platform/internal/capability/domain/outcome"
 	"github.com/DrizzDev/platform/internal/platform/build"
 	"github.com/DrizzDev/platform/internal/transport/mcp"
@@ -31,6 +32,10 @@ func (performer performer) Screenshot(context.Context, operator.Target) (operato
 
 func (performer performer) Devices(context.Context) (operator.Roster, error) {
 	return performer.roster, performer.fail
+}
+
+func (performer performer) Tap(context.Context, operator.Contact) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
 }
 
 type dialog struct {
@@ -146,7 +151,7 @@ func TestScreenshotTool(test *testing.T) {
 	}.session(scope)
 
 	result, failure := session.CallTool(scope, &protocol.CallToolParams{
-		Name:      "screenshot",
+		Name:      "TakeScreenshot",
 		Arguments: map[string]any{"serial": "s-1"},
 	})
 	if failure != nil {
@@ -176,7 +181,7 @@ func TestDevicesTool(test *testing.T) {
 	}.session(scope)
 
 	result, failure := session.CallTool(scope, &protocol.CallToolParams{
-		Name:      "devices",
+		Name:      "ListDevices",
 		Arguments: map[string]any{},
 	})
 	if failure != nil {
@@ -203,7 +208,7 @@ func TestScreenshotToolRefused(test *testing.T) {
 	}.session(scope)
 
 	result, failure := session.CallTool(scope, &protocol.CallToolParams{
-		Name:      "screenshot",
+		Name:      "TakeScreenshot",
 		Arguments: map[string]any{"serial": "s-9"},
 	})
 	if failure != nil {
@@ -215,6 +220,30 @@ func TestScreenshotToolRefused(test *testing.T) {
 	text, valid := result.Content[0].(*protocol.TextContent)
 	if !valid || !strings.Contains(text.Text, "not found") {
 		test.Fatalf("content = %#v", result.Content[0])
+	}
+}
+
+// TestCatalogCovered is the other half of the completeness gate: every catalogued capability must be offered as an
+// agent tool, so a capability can never be catalogued but left off the agent connection.
+func TestCatalogCovered(test *testing.T) {
+	test.Parallel()
+
+	scope, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	session := dialog{test: test, perform: performer{}}.session(scope)
+	listed, failure := session.ListTools(scope, nil)
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	present := make(map[string]bool, len(listed.Tools))
+	for _, tool := range listed.Tools {
+		present[tool.Name] = true
+	}
+	for _, entry := range catalog.New().List() {
+		if !present[entry.Title()] {
+			test.Errorf("catalogued capability %q has no agent tool", entry.Title())
+		}
 	}
 }
 

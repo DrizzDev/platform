@@ -10,4 +10,5 @@ import (
 type Perform interface {
 	Screenshot(context.Context, operator.Target) (operator.Shot, error)
 	Devices(context.Context) (operator.Roster, error)
+	Tap(context.Context, operator.Contact) (operator.Ack, error)
 }
