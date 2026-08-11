@@ -3,6 +3,10 @@ package configuration
 const (
 	prefix = "DRIZZ_"
 
+	// reserved is the device-helper override namespace read by the device layer for tests and continuous integration.
+	// It is not a configuration setting, so keys under it are deliberately not treated as unknown settings.
+	reserved = "DRIZZ_DEVICE_"
+
 	level    = "DRIZZ_LOG_LEVEL"
 	exporter = "DRIZZ_TELEMETRY_EXPORTER"
 	endpoint = "DRIZZ_TELEMETRY_ENDPOINT"

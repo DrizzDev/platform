@@ -86,7 +86,10 @@ func (channel *Channel) ensure(scope context.Context) (*session, error) {
 	if time.Now().Before(channel.attempt) {
 		return nil, Unavailable{}
 	}
-	live, failure := channel.build(scope)
+	// The helper is long-lived and shared across requests, so it is started detached from the request that happens to
+	// trigger the start; otherwise that request's completion would tear the process down and the next call would pay
+	// to respawn it. Teardown is owned by Close and the timeout-recycle path through the session, not by this context.
+	live, failure := channel.build(context.WithoutCancel(scope))
 	if failure != nil {
 		channel.penalize()
 		return nil, failure

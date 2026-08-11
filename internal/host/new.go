@@ -19,6 +19,11 @@ func New(options Options) (*Host, error) {
 	if failure != nil {
 		return nil, failure
 	}
+	device := &station{base: foundation{
+		environment: options.Environment,
+		streams:     options.Streams,
+		build:       info,
+	}}
 	command, failure := cli.New(cli.Options{
 		Arguments: options.Arguments,
 		Streams: cli.Streams{
@@ -48,14 +53,10 @@ func New(options Options) (*Host, error) {
 			streams:     options.Streams,
 			build:       info,
 		}},
-		Perform: pilot{foundation{
-			environment: options.Environment,
-			streams:     options.Streams,
-			build:       info,
-		}},
+		Perform: pilot{station: device},
 	})
 	if failure != nil {
 		return nil, failure
 	}
-	return &Host{command: command, failure: options.Streams.Failure}, nil
+	return &Host{command: command, failure: options.Streams.Failure, device: device}, nil
 }

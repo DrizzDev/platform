@@ -11,6 +11,9 @@ import (
 	"github.com/DrizzDev/platform/internal/capability/domain/catalog"
 )
 
+// mime is the media-type prefix for the captured image content returned to the agent.
+const mime = "image/"
+
 // snapshot is the input to the screenshot tool. Its schema is inferred from these fields.
 type snapshot struct {
 	Serial string `json:"serial" jsonschema:"the serial of the device to capture"`
@@ -34,7 +37,7 @@ func (server Server) register(perform Perform) {
 			if failure != nil {
 				return server.refuse(failure), nil, nil
 			}
-			image := &protocol.ImageContent{Data: shot.Image, MIMEType: "image/" + strings.ToLower(shot.Format)}
+			image := &protocol.ImageContent{Data: shot.Image, MIMEType: mime + strings.ToLower(shot.Format)}
 			return &protocol.CallToolResult{Content: []protocol.Content{image}}, nil, nil
 		})
 

@@ -37,6 +37,12 @@ func (runtime runtime) Run(scope context.Context) error {
 func (runtime runtime) serve(scope context.Context, observer observability.Provider) error {
 	current := session{observer: observer}
 	defer current.shutdown(scope)
+	device := &station{base: foundation{
+		environment: runtime.environment,
+		streams:     runtime.streams,
+		build:       runtime.build,
+	}}
+	defer device.close()
 	server, failure := mcp.New(mcp.Options{
 		Release:  runtime.identity,
 		Logger:   observer.Diagnostics(),
@@ -45,11 +51,7 @@ func (runtime runtime) serve(scope context.Context, observer observability.Provi
 		Meter:    observer.Meter(),
 		Input:    runtime.streams.Input,
 		Output:   runtime.streams.Output,
-		Perform: pilot{foundation{
-			environment: runtime.environment,
-			streams:     runtime.streams,
-			build:       runtime.build,
-		}},
+		Perform:  pilot{station: device},
 	})
 	if failure != nil {
 		observer.Report(scope)

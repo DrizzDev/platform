@@ -22,6 +22,9 @@ func (loader Loader) reject(key string) bool {
 	if !strings.HasPrefix(key, prefix) {
 		return false
 	}
+	if strings.HasPrefix(key, reserved) {
+		return false
+	}
 	switch key {
 	case level, exporter, endpoint, dsn, sample, stage,
 		issuer, client, audience, redirect, scopes, session, cloud:
