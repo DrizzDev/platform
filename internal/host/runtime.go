@@ -45,6 +45,11 @@ func (runtime runtime) serve(scope context.Context, observer observability.Provi
 		Meter:    observer.Meter(),
 		Input:    runtime.streams.Input,
 		Output:   runtime.streams.Output,
+		Perform: pilot{foundation{
+			environment: runtime.environment,
+			streams:     runtime.streams,
+			build:       runtime.build,
+		}},
 	})
 	if failure != nil {
 		observer.Report(scope)

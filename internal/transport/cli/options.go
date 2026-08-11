@@ -7,6 +7,7 @@ type Options struct {
 	Login     Session
 	Device    Session
 	Logout    Departure
+	Perform   Perform
 	Arguments []string
 	Streams   Streams
 	Release   release.Identity

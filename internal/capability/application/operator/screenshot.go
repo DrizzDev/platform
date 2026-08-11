@@ -35,7 +35,7 @@ func (operator Operator) Screenshot(scope context.Context, target Target) (Shot,
 func (operator Operator) resolve(scope context.Context, value string) (device.Device, error) {
 	chosen, failure := serial.New(value)
 	if failure != nil {
-		return device.Device{}, Refusal{code: outcome.Invalid}
+		return device.Device{}, Refusal{Code: outcome.Invalid}
 	}
 	discovery := operator.flow.Discover(scope)
 	if reason, failed := discovery.Failure(); failed {
@@ -46,7 +46,7 @@ func (operator Operator) resolve(scope context.Context, value string) (device.De
 			return candidate, nil
 		}
 	}
-	return device.Device{}, Refusal{code: outcome.Missing}
+	return device.Device{}, Refusal{Code: outcome.Missing}
 }
 
 // record writes the capture as one observational execution entry. If the record cannot be opened, the drop is logged

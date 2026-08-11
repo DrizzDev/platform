@@ -10,22 +10,22 @@ import (
 func (Operator) refuse(cause code.Code) Refusal {
 	switch cause {
 	case code.Missing:
-		return Refusal{code: outcome.Missing}
+		return Refusal{Code: outcome.Missing}
 	case code.Unauthorized:
-		return Refusal{code: outcome.Unauthorized}
+		return Refusal{Code: outcome.Unauthorized}
 	case code.Unavailable:
-		return Refusal{code: outcome.Unavailable}
+		return Refusal{Code: outcome.Unavailable}
 	case code.Timeout:
-		return Refusal{code: outcome.Timeout}
+		return Refusal{Code: outcome.Timeout}
 	case code.Incompatible:
-		return Refusal{code: outcome.Unsupported}
+		return Refusal{Code: outcome.Unsupported}
 	case code.Protected:
-		return Refusal{code: outcome.Refused}
+		return Refusal{Code: outcome.Refused}
 	case code.Cancelled:
-		return Refusal{code: outcome.Cancelled}
+		return Refusal{Code: outcome.Cancelled}
 	case code.Failed:
-		return Refusal{code: outcome.Failed}
+		return Refusal{Code: outcome.Failed}
 	default:
-		return Refusal{code: outcome.Failed}
+		return Refusal{Code: outcome.Failed}
 	}
 }

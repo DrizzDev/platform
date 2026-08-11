@@ -18,4 +18,5 @@ type Options struct {
 	Meter    metric.Meter
 	Input    io.ReadCloser
 	Output   io.Writer
+	Perform  Perform
 }

@@ -15,11 +15,12 @@ const (
 	Refused      Code = "DEVICE_REFUSED"
 	Failed       Code = "CAPABILITY_FAILED"
 	Cancelled    Code = "CAPABILITY_CANCELLED"
+	Unprepared   Code = "CAPABILITY_UNPREPARED"
 )
 
 func (code Code) Valid() bool {
 	switch code {
-	case Invalid, Missing, Unauthorized, Unavailable, Timeout, Unsupported, Refused, Failed, Cancelled:
+	case Invalid, Missing, Unauthorized, Unavailable, Timeout, Unsupported, Refused, Failed, Cancelled, Unprepared:
 		return true
 	default:
 		return false
@@ -34,7 +35,7 @@ func (code Code) Retryable() bool {
 	switch code {
 	case Unavailable, Timeout:
 		return true
-	case Invalid, Missing, Unauthorized, Unsupported, Refused, Failed, Cancelled:
+	case Invalid, Missing, Unauthorized, Unsupported, Refused, Failed, Cancelled, Unprepared:
 		return false
 	}
 	return false
@@ -61,6 +62,8 @@ func (code Code) Detail() string {
 		return "The capability was cancelled."
 	case Failed:
 		return "The capability could not be completed."
+	case Unprepared:
+		return "This capability is not set up on this computer yet; it becomes available once Drizz is installed."
 	}
 	return "The capability could not be completed."
 }

@@ -5,10 +5,13 @@ import (
 	"context"
 	"errors"
 	"io"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/DrizzDev/platform/internal/application/release"
+	"github.com/DrizzDev/platform/internal/capability/application/operator"
+	"github.com/DrizzDev/platform/internal/capability/domain/outcome"
 	"github.com/DrizzDev/platform/internal/identity/application/login"
 	"github.com/DrizzDev/platform/internal/identity/application/logout"
 	"github.com/DrizzDev/platform/internal/transport/cli"
@@ -27,6 +30,21 @@ type fixture struct {
 	session   cli.Session
 	device    cli.Session
 	logout    cli.Departure
+	perform   cli.Perform
+}
+
+type performer struct {
+	shot   operator.Shot
+	roster operator.Roster
+	fail   error
+}
+
+func (performer performer) Screenshot(context.Context, operator.Target) (operator.Shot, error) {
+	return performer.shot, performer.fail
+}
+
+func (performer performer) Devices(context.Context) (operator.Roster, error) {
+	return performer.roster, performer.fail
 }
 
 func (run runner) Run(scope context.Context) error {
@@ -204,6 +222,72 @@ func TestSignout(test *testing.T) {
 	}
 }
 
+func TestScreenshot(test *testing.T) {
+	test.Parallel()
+
+	var output bytes.Buffer
+	command, failure := cli.New(fixture{
+		arguments: []string{"screenshot", "s-1"},
+		output:    &output,
+		perform:   performer{shot: operator.Shot{Image: []byte("png-bytes"), Format: "PNG"}},
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if failure := command.Run(context.Background()); failure != nil {
+		test.Fatal(failure)
+	}
+	path := strings.TrimSpace(output.String())
+	if !strings.HasSuffix(path, ".png") {
+		test.Fatalf("printed path = %q", path)
+	}
+	written, failure := os.ReadFile(path)
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	_ = os.Remove(path)
+	if string(written) != "png-bytes" {
+		test.Fatalf("written = %q", written)
+	}
+}
+
+func TestDevices(test *testing.T) {
+	test.Parallel()
+
+	var output bytes.Buffer
+	command, failure := cli.New(fixture{
+		arguments: []string{"devices"},
+		output:    &output,
+		perform:   performer{roster: operator.Roster{Serials: []string{"s-1", "s-2"}}},
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if failure := command.Run(context.Background()); failure != nil {
+		test.Fatal(failure)
+	}
+	if !strings.Contains(output.String(), "s-1") || !strings.Contains(output.String(), "s-2") {
+		test.Fatalf("output = %q", output.String())
+	}
+}
+
+func TestScreenshotRefused(test *testing.T) {
+	test.Parallel()
+
+	command, failure := cli.New(fixture{
+		arguments: []string{"screenshot", "s-9"},
+		output:    io.Discard,
+		perform:   performer{fail: operator.Refusal{Code: outcome.Missing}},
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	failure = command.Run(context.Background())
+	if failure == nil || !strings.Contains(failure.Error(), "not found") {
+		test.Fatalf("refused screenshot = %v", failure)
+	}
+}
+
 func (fixture fixture) options() cli.Options {
 	identity, _ := release.New(release.Input{
 		Name:     "drizz",
@@ -222,6 +306,14 @@ func (fixture fixture) options() cli.Options {
 	if farewell == nil {
 		farewell = exit(func(context.Context) (logout.Result, error) { return logout.Result{}, nil })
 	}
+	perform := fixture.perform
+	if perform == nil {
+		perform = performer{}
+	}
+	server := fixture.server
+	if server == nil {
+		server = runner(func(context.Context) error { return nil })
+	}
 	return cli.Options{
 		Arguments: fixture.arguments,
 		Streams: cli.Streams{
@@ -230,9 +322,10 @@ func (fixture fixture) options() cli.Options {
 			Failure: io.Discard,
 		},
 		Release: identity,
-		MCP:     fixture.server,
+		MCP:     server,
 		Login:   session,
 		Device:  passcode,
 		Logout:  farewell,
+		Perform: perform,
 	}
 }

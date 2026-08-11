@@ -48,6 +48,11 @@ func New(options Options) (*Host, error) {
 			streams:     options.Streams,
 			build:       info,
 		}},
+		Perform: pilot{foundation{
+			environment: options.Environment,
+			streams:     options.Streams,
+			build:       info,
+		}},
 	})
 	if failure != nil {
 		return nil, failure

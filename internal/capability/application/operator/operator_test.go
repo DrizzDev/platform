@@ -156,7 +156,7 @@ func TestScreenshotUnknownDevice(test *testing.T) {
 
 	_, failure := performed.Screenshot(context.Background(), operator.Target{Serial: "s-2"})
 	var refusal operator.Refusal
-	if !errors.As(failure, &refusal) || refusal.Code() != outcome.Missing {
+	if !errors.As(failure, &refusal) || refusal.Code != outcome.Missing {
 		test.Fatalf("unknown device = %v, want a not-found refusal", failure)
 	}
 }
