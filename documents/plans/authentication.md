@@ -4,20 +4,13 @@ Status: Final
 
 ## 1. Purpose
 
-This is the binding implementation plan for Stage 3 of the
-[Delivery Roadmap](../roadmap.md). The approved product and security behavior
-remains in [Authentication and Authorization](../authentication.md), and the
-architectural decision remains in
-[ADR 0006](../decisions/0006-authentication.md).
+This is the binding implementation plan for Stage 3 of the [Delivery Roadmap](../roadmap.md). The approved product and security behavior remains in [Authentication and Authorization](../authentication.md), and the architectural decision remains in [ADR 0006](../decisions/0006-authentication.md).
 
-Work starts with Gate 1. A later slice must stop when Gate 1 has not resolved a
-fact it depends on. A coding agent must reread the repository standards and copy
-the slice inventory into its issue or pull request before editing.
+Work starts with Gate 1. A later slice must stop when Gate 1 has not resolved a fact it depends on.
 
 ## 2. Outcome
 
-Stage 3 delivers one identity module reused by CLI, local MCP, and the future
-desktop boundary. It supports:
+Stage 3 delivers one identity module reused by CLI, local MCP, and the future desktop boundary. It supports:
 
 - system-browser Authorization Code with PKCE for normal user sign-in;
 - explicit Device Authorization for a user-present headless terminal;
@@ -26,13 +19,10 @@ desktop boundary. It supports:
 - safe concurrent use by separate CLI and MCP processes;
 - current organization resolution and cloud authorization through Drizz Cloud;
 - GitHub Actions OIDC federation for the first CI workload;
-- deterministic logout, revocation, expiry, cancellation, restart, and
-  recovery; and
+- deterministic logout, revocation, expiry, cancellation, restart, and recovery; and
 - unchanged login behavior for existing Drizz products.
 
-Stage 3 does not add a public MCP tool. Stage 6 proves real authenticated MCP
-capability invocation. Stage 3 proves only that MCP composition can consume the
-same identity application without receiving a credential.
+Stage 3 does not add a public MCP tool. Stage 6 proves real authenticated MCP capability invocation. Stage 3 proves only that MCP composition can consume the same identity application without receiving a credential.
 
 ## 3. Scope
 
@@ -42,8 +32,7 @@ same identity application without receiving a credential.
 - browser and device user journeys;
 - supported macOS, Windows, and Linux credential vaults;
 - typed identity, session, organization, credential, and failure contracts;
-- SQLite coordination for leases, fenced publication, session invalidation,
-  recovery, and durable credential cleanup;
+- SQLite coordination for leases, fenced publication, session invalidation, recovery, and durable credential cleanup;
 - `drizz login`, `drizz login --device`, and `drizz logout`;
 - Drizz Cloud organization resolution and authorization proof;
 - GitHub Actions workload federation;
@@ -52,17 +41,14 @@ same identity application without receiving a credential.
 
 ### Excluded
 
-- replacing or changing existing web, playground, desktop, backend, or load
-  balancer login flows;
+- replacing or changing existing web, playground, desktop, backend, or load balancer login flows;
 - remote HTTP MCP authorization;
 - Dynamic Client Registration;
 - a hosted-agent relay;
 - a local authentication daemon;
 - organization selection or administration;
 - a token-print, token-import, or authentication MCP tool;
-- storing human access or refresh tokens in files, SQLite, environment
-  variables, arguments, MCP messages, model context, logs, traces, crash data,
-  or execution records; and
+- storing human access or refresh tokens in files, SQLite, environment variables, arguments, MCP messages, model context, logs, traces, crash data, or execution records; and
 - custom OAuth, OIDC, JWT, PKCE, encryption, or vault implementations.
 
 ## 4. Binding decisions
@@ -81,9 +67,7 @@ same identity application without receiving a credential.
 | Machine fallback | Excluded unless federation fails an approved journey and a separate review accepts it |
 | Remote MCP | Future plan when a remote endpoint enters the roadmap |
 
-The previously created Auth0 application named Drizz MCP is evidence, not a
-configuration template. Gate 1 must inspect it and propose the final additive
-Platform resources through the existing infrastructure owner.
+The previously created Auth0 application named Drizz MCP is evidence, not a configuration template. Gate 1 must inspect it and propose the final additive Platform resources through the existing infrastructure owner.
 
 ## 5. Architecture
 
@@ -123,11 +107,7 @@ flowchart TB
     github --> ports
 ```
 
-Dependencies point inward. Domain contains deterministic identity meaning only.
-Application owns use cases, state transitions, cancellation, and narrow ports.
-Infrastructure implements provider, network, process, persistence, and
-credential ports. CLI validates and maps external input. Host owns composition
-and shutdown only.
+Dependencies point inward. Domain contains deterministic identity meaning only. Application owns use cases, state transitions, cancellation, and narrow ports. Infrastructure implements provider, network, process, persistence, and credential ports. CLI validates and maps external input. Host owns composition and shutdown only.
 
 ### Planned ownership
 
@@ -159,32 +139,19 @@ tests/identity/
 tests/process/
 ```
 
-Every directory and file uses one precise word. Every source file owns one
-primary concept. Infrastructure types never cross into application or domain.
-No generic service, manager, helper, types, common, or utility package is
-allowed.
+Every directory and file uses one precise word. Every source file owns one primary concept. Infrastructure types never cross into application or domain. No generic service, manager, helper, types, common, or utility package is allowed.
 
 ## 6. Contracts
 
 ### Trusted context
 
-The application returns validated subject identity, session status, expiry,
-authentication method, stable Drizz session identity, and current organization
-only when the operation requires and successfully resolves it. It never returns
-an access token, refresh token, authorization code, device code, provider
-response, HTTP object, or Auth0 SDK type.
+The application returns validated subject identity, session status, expiry, authentication method, stable Drizz session identity, and current organization only when the operation requires and successfully resolves it. It never returns an access token, refresh token, authorization code, device code, provider response, HTTP object, or Auth0 SDK type.
 
 ### Credential contracts
 
-`credential.Record` contains issuer, native-client identity, provider subject,
-Drizz session identity, authentication method, renewable credential bytes,
-issue and expiry facts, revision, and schema version. It contains no profile,
-role, organization, access decision, or arbitrary provider payload.
+`credential.Record` contains issuer, native-client identity, provider subject, Drizz session identity, authentication method, renewable credential bytes, issue and expiry facts, revision, and schema version. It contains no profile, role, organization, access decision, or arbitrary provider payload.
 
-`grant.Credential` is the confined short-lived Platform access credential. Only
-the session application and approved Auth0 and cloud infrastructure may import
-it. Architecture tests prohibit it in CLI, MCP, desktop, capabilities,
-telemetry, and general cloud clients.
+`grant.Credential` is the confined short-lived Platform access credential. Only the session application and approved Auth0 and cloud infrastructure may import it. Architecture tests prohibit it in CLI, MCP, desktop, capabilities, telemetry, and general cloud clients.
 
 ### Use cases
 
@@ -197,18 +164,11 @@ telemetry, and general cloud clients.
 | `organization` | `Flow.Resolve(context.Context, Input) Result` | `Resolver` |
 | `workload` | `Flow.Exchange(context.Context, Input) Result` | `Assertion`, `Exchange`, `Replay`, `Clock` |
 
-All state is private and constructed through validated typed input. Every
-multi-value call uses a keyed input struct. Context is the first argument. No
-raw map, `any`, provider SDK type, database row, or transport model crosses a
-layer.
+All state is private and constructed through validated typed input. Every multi-value call uses a keyed input struct. Context is the first argument. No raw map, `any`, provider SDK type, database row, or transport model crosses a layer.
 
 ### Failure contract
 
-`failure.Value` contains a stable code, category, retryability, recommended
-action, allowlisted safe detail, correlation identity, and optional retry time.
-Raw provider causes remain private and are never rendered, logged, traced, or
-reported to Sentry. Unexpected identity failures become a code-only result
-before reaching the host.
+`failure.Value` contains a stable code, category, retryability, recommended action, allowlisted safe detail, correlation identity, and optional retry time. Raw provider causes remain private and are never rendered, logged, traced, or reported to Sentry. Unexpected identity failures become a code-only result before reaching the host.
 
 The stable values are:
 
@@ -222,8 +182,7 @@ The stable values are:
 - `LOGOUT_PARTIAL`
 - `IDENTITY_FAILED`
 
-Released values are additive. A value is never renamed or reused for a
-different meaning.
+Released values are additive. A value is never renamed or reused for a different meaning.
 
 ## 7. CLI behavior
 
@@ -233,16 +192,9 @@ different meaning.
 | `drizz login --device` | Starts Device Authorization; no browser fallback |
 | `drizz logout` | Removes local access idempotently, then attempts bounded revocation |
 
-Successful login prints `Signed in to Drizz.` to standard output. Successful
-logout prints `Signed out of Drizz.` to standard output. Device instructions go
-only to a trusted controlling terminal, never stdout, stderr, MCP, or model
-context. A missing trusted terminal fails safely.
+Successful login prints `Signed in to Drizz.` to standard output. Successful logout prints `Signed out of Drizz.` to standard output. Device instructions go only to a trusted controlling terminal, never stdout, stderr, MCP, or model context. A missing trusted terminal fails safely.
 
-Invalid login syntax prints only `Usage: drizz login [--device]`. Invalid
-logout syntax prints only `Usage: drizz logout`. Unknown input is never echoed.
-Stage 3 adds no JSON mode. Exit status is `0` for a completed local result and
-`1` for usage, cancellation, partial logout, or failure, preserving the current
-process contract.
+Invalid login syntax prints only `Usage: drizz login [--device]`. Invalid logout syntax prints only `Usage: drizz logout`. Unknown input is never echoed. Stage 3 adds no JSON mode. Exit status is `0` for a completed local result and `1` for usage, cancellation, partial logout, or failure, preserving the current process contract.
 
 | Failure | Fixed standard-error message |
 | --- | --- |
@@ -263,36 +215,23 @@ process contract.
 1. Create cryptographic state, nonce, and PKCE verifier.
 2. Bind a loopback listener to `127.0.0.1` only.
 3. Open the system browser.
-4. Validate callback method, path, size, state, issuer, audience, signature,
-   nonce, expiry, and schema.
+4. Validate callback method, path, size, state, issuer, audience, signature, nonce, expiry, and schema.
 5. Exchange and validate the code.
 6. Write a uniquely named immutable vault candidate.
 7. Publish only when the starting session epoch still matches.
-8. Advance the epoch and remove any superseded credential through durable
-   cleanup.
+8. Advance the epoch and remove any superseded credential through durable cleanup.
 
-Concurrent login attempts cannot switch accounts by last writer. The first
-valid compare-and-swap wins. A different active subject returns
-`ACCOUNT_CONFLICT`; the user must log out before switching accounts.
+Concurrent login attempts cannot switch accounts by last writer. The first valid compare-and-swap wins. A different active subject returns `ACCOUNT_CONFLICT`; the user must log out before switching accounts.
 
-The callback sends at most 1 KiB of fixed Drizz-authored HTML with UTF-8 HTML,
-`Cache-Control: no-store`, `Content-Security-Policy: default-src 'none'`,
-`Referrer-Policy: no-referrer`, and `X-Content-Type-Options: nosniff`. It reflects
-no provider or query value. The exact callback path consumes one request. A bad
-method, state, or schema returns a fixed rejection and closes the listener.
-Other paths receive a fixed 404; three such requests close the listener.
+The callback sends at most 1 KiB of fixed Drizz-authored HTML with UTF-8 HTML, `Cache-Control: no-store`, `Content-Security-Policy: default-src 'none'`, `Referrer-Policy: no-referrer`, and `X-Content-Type-Options: nosniff`. It reflects no provider or query value. The exact callback path consumes one request. A bad method, state, or schema returns a fixed rejection and closes the listener. Other paths receive a fixed 404; three such requests close the listener.
 
 ### Device login
 
-Device login uses provider interval, `slow_down`, expiry, and cancellation. The
-verification URI and user code are validated, bounded, and written once to the
-controlling terminal. It uses the same epoch and fenced publication policy as
-browser login.
+Device login uses provider interval, `slow_down`, expiry, and cancellation. The verification URI and user code are validated, bounded, and written once to the controlling terminal. It uses the same epoch and fenced publication policy as browser login.
 
 ### Refresh publication
 
-Vault credential versions are immutable. SQLite contains only non-secret active
-pointer, epoch, lease, attempt, fencing, and cleanup metadata.
+Vault credential versions are immutable. SQLite contains only non-secret active pointer, epoch, lease, attempt, fencing, and cleanup metadata.
 
 ```mermaid
 stateDiagram-v2
@@ -306,37 +245,17 @@ stateDiagram-v2
     Cleanup --> [*]: deletion acknowledged
 ```
 
-Before refresh, SQLite irreversibly marks the active revision `ATTEMPTED` in a
-short transaction. No second process may exchange that revision, even after
-lease expiry. Auth0 I/O and vault I/O occur outside mutexes, file locks, and
-SQLite transactions. A validated response is written to a unique vault key,
-then one fenced compare-and-swap transaction publishes it. A stale process may
-create an orphan candidate but cannot change the active pointer.
+Before refresh, SQLite irreversibly marks the active revision `ATTEMPTED` in a short transaction. No second process may exchange that revision, even after lease expiry. Auth0 I/O and vault I/O occur outside mutexes, file locks, and SQLite transactions. A validated response is written to a unique vault key, then one fenced compare-and-swap transaction publishes it. A stale process may create an orphan candidate but cannot change the active pointer.
 
-If a process ends after Auth0 may have rotated the token but before a candidate
-reaches the vault, the revision becomes `UNCERTAIN` and requires login. Drizz
-never retries an uncertain refresh token and never depends on Auth0 overlap for
-correctness.
+If a process ends after Auth0 may have rotated the token but before a candidate reaches the vault, the revision becomes `UNCERTAIN` and requires login. Drizz never retries an uncertain refresh token and never depends on Auth0 overlap for correctness.
 
 ### Logout and cleanup
 
-Logout atomically clears the active pointer, advances the epoch, and enqueues
-all active and candidate vault keys for cleanup. Other processes check the epoch
-before using cached access. Physical deletion is idempotent. Remote revocation
-runs afterward with the in-memory credential and no held lease or transaction.
+Logout atomically clears the active pointer, advances the epoch, and enqueues all active and candidate vault keys for cleanup. Other processes check the epoch before using cached access. Physical deletion is idempotent. Remote revocation runs afterward with the in-memory credential and no held lease or transaction.
 
-A cleanup record stores only vault key, reason, state, attempt count, next retry,
-retry deadline, and creation time. Five bounded retries are allowed. Exhaustion
-moves the record to `BLOCKED`; it is never silently discarded. Startup and each
-credential mutation reconcile at most four records. Sixteen retained records
-block further credential creation. A missing vault key counts as successful
-deletion, making a crash between deletion and acknowledgement recoverable.
+A cleanup record stores only vault key, reason, state, attempt count, next retry, retry deadline, and creation time. Five bounded retries are allowed. Exhaustion moves the record to `BLOCKED`; it is never silently discarded. Startup and each credential mutation reconcile at most four records. Sixteen retained records block further credential creation. A missing vault key counts as successful deletion, making a crash between deletion and acknowledgement recoverable.
 
-The identity coordination database is versioned, permission-restricted,
-size-bounded, and stored under the resolved Drizz-owned data root. It contains
-no token, provider subject, profile, organization, or provider payload. All
-opens, migrations, checkpoints, and cleanup resist traversal, symlink
-substitution, and cross-user access. Corruption fails closed.
+The identity coordination database is versioned, permission-restricted, size-bounded, and stored under the resolved Drizz-owned data root. It contains no token, provider subject, profile, organization, or provider payload. All opens, migrations, checkpoints, and cleanup resist traversal, symlink substitution, and cross-user access. Corruption fails closed.
 
 ### Offline behavior
 
@@ -350,16 +269,11 @@ substitution, and cross-user access. Corruption fails closed.
 | Organization resolution unavailable | Return `AUTHENTICATION_UNAVAILABLE`; persist no organization response |
 | Restart while offline | Return `AUTHENTICATION_UNAVAILABLE`; a vault credential is not an access token |
 
-Stage 3 grants no capability offline. A later local capability must explicitly
-decide whether subject-only context is sufficient; otherwise it fails closed.
+Stage 3 grants no capability offline. A later local capability must explicitly decide whether subject-only context is sufficient; otherwise it fails closed.
 
 ## 9. Security and operating bounds
 
-The provider subject is pseudonymous sensitive identity data used only to
-detect account replacement. It is stored only inside the vault record, retained
-until logout or credential removal, and never enters SQLite, paths, output,
-telemetry, or support data. Organization identity and roles are not persisted
-locally in Stage 3.
+The provider subject is pseudonymous sensitive identity data used only to detect account replacement. It is stored only inside the vault record, retained until logout or credential removal, and never enters SQLite, paths, output, telemetry, or support data. Organization identity and roles are not persisted locally in Stage 3.
 
 | Boundary | Bound |
 | --- | --- |
@@ -384,22 +298,13 @@ locally in Stage 3.
 | Terminal output | 2 KiB |
 | Per operation | 4 MiB transient memory; two owned goroutines; one listener; one SQLite connection |
 
-Retry is limited to Device Authorization protocol responses, one controlled key
-refresh after an unknown key ID, and operations proven idempotent. Token
-exchange, refresh, publication, and revocation are never blindly retried.
+Retry is limited to Device Authorization protocol responses, one controlled key refresh after an unknown key ID, and operations proven idempotent. Token exchange, refresh, publication, and revocation are never blindly retried.
 
-Gate 1 produces a threat model with named rows for replay, downgrade,
-credential theft, tampering, tenant crossover, provider compromise, support
-misuse, and dependency integrity. Every row records assets, entry points,
-control, detection, test, residual risk, and owner. An unowned high or critical
-risk blocks Slice 2.
+Gate 1 produces a threat model with named rows for replay, downgrade, credential theft, tampering, tenant crossover, provider compromise, support misuse, and dependency integrity. Every row records assets, entry points, control, detection, test, residual risk, and owner. An unowned high or critical risk blocks Slice 2.
 
 ## 10. Configuration and dependencies
 
-Issuer, audience, native-client identity, callback policy, scopes, timeouts,
-limits, refresh margin, and lease policy are immutable typed settings. Installed
-users do not need `.env`. Production identity settings are release-owned and
-pinned. Secrets use credential references or application-owned secret ports.
+Issuer, audience, native-client identity, callback policy, scopes, timeouts, limits, refresh margin, and lease policy are immutable typed settings. Installed users do not need `.env`. Production identity settings are release-owned and pinned. Secrets use credential references or application-owned secret ports.
 
 Candidate dependencies are:
 
@@ -408,33 +313,15 @@ Candidate dependencies are:
 - `github.com/zalando/go-keyring` for supported operating-system vaults; and
 - `modernc.org/sqlite` for pure-Go SQLite.
 
-Each requires a separate `DEL-002` proof covering necessity, alternatives,
-license, maintenance, security, transitive risk, binary size, performance,
-supported builds, and replacement boundary. No Auth0 Management SDK, ORM,
-migration framework, authentication framework, or automatically refreshing
-general-purpose token source is approved.
+Each requires a separate proof covering necessity, alternatives, license, maintenance, security, transitive risk, binary size, performance, supported builds, and replacement boundary. No Auth0 Management SDK, ORM, migration framework, authentication framework, or automatically refreshing general-purpose token source is approved.
 
-GitHub workload identity enters through an application-owned assertion port.
-Protected file or socket ingress is allowed. If GitHub requires environment
-bootstrap values, Gate 1 must first add an owner-approved narrow security rule
-naming the keys, infrastructure package, lifetime, non-propagation, erasure,
-logging exclusion, and real CI evidence. It is never ordinary configuration or
-available to local MCP, user CLI, plugins, hooks, children, or capability input.
+GitHub workload identity enters through an application-owned assertion port. Protected file or socket ingress is allowed. If GitHub requires environment bootstrap values, Gate 1 must first add an owner-approved narrow security rule naming the keys, infrastructure package, lifetime, non-propagation, erasure, logging exclusion, and real CI evidence. It is never ordinary configuration or available to local MCP, user CLI, plugins, hooks, children, or capability input.
 
 ## 11. Delivery order
 
-Order is Gate 1, Slice 2, Slice 3, Slices 4 and 5, Slice 6, Slice 7, Slice 8,
-then Gate 9. Slices 4 and 5 may overlap only with disjoint files. Every item uses
-the mandatory inventory fields below.
+Order is Gate 1, Slice 2, Slice 3, Slices 4 and 5, Slice 6, Slice 7, Slice 8, then Gate 9. Slices 4 and 5 may overlap only with disjoint files. Every item uses the mandatory inventory fields below.
 
-**Amendment (2026-08-05, owner decision):** Gates 1 through Slice 7 are complete,
-green, and proven live. **Slice 8 (workload authentication) is deferred** as it
-is not the current priority; it resumes once evidence F5 is resolved. Gate 9
-release qualification proceeds now for the completed user-authentication
-vertical, macOS first, since that is the only supported vault available to the
-owner. Progress and the remaining `TODO(slice-8)` and cross-platform,
-signing, and supply-chain work are tracked in
-[the qualification runbook](../runbooks/authentication.md).
+**Amendment (2026-08-05, owner decision):** Gates 1 through Slice 7 are complete, green, and proven live. **Slice 8 (workload authentication) is deferred** as it is not the current priority; it resumes once the outstanding workload-federation evidence is resolved. Gate 9 release qualification proceeds now for the completed user-authentication vertical, macOS first, since that is the only supported vault available to the owner. Progress and the remaining workload-federation, cross-platform, signing, and supply-chain work are tracked in [the qualification runbook](../runbooks/authentication.md).
 
 ### Gate 1: Evidence and threat model
 
@@ -451,11 +338,7 @@ signing, and supply-chain work are tracked in
 | Tests | Baseline every existing staging login and inspect current Auth0 resources |
 | Verification | Documentation checks, owner review, threat review, and clean diff |
 
-Gate 1 must resolve the exact organization endpoint and contract; final Auth0
-resource proposal; supported OS matrix; GitHub issuer, audience, subject,
-assertion lifetime, ingress, exchange authentication, `jti`, atomic replay
-owner and retention; real-browser test journey; exact cross-repository files;
-and all dependency proofs needed by Slice 2 or 3.
+Gate 1 must resolve the exact organization endpoint and contract; final Auth0 resource proposal; supported OS matrix; GitHub issuer, audience, subject, assertion lifetime, ingress, exchange authentication, `jti`, atomic replay owner and retention; real-browser test journey; exact cross-repository files; and all dependency proofs needed by Slice 2 or 3.
 
 ### Slice 2: Contracts and enforcement
 
@@ -577,10 +460,7 @@ and all dependency proofs needed by Slice 2 or 3.
 | Tests | Signed clean install, checksum, upgrade, rollback, login, restart, MCP composition, desktop boundary, CI, logout, uninstall, privacy, SBOM, provenance, and existing-flow regression |
 | Verification | Supported matrix, signing, checksums, dependency inventory, SBOM, provenance, clean-machine proof, `make verify`, every affected merge gate, and independent security review |
 
-Each production package also has colocated `*_test.go` files for its values,
-policy, orchestration, parser, transition, retry, serialization, and private
-infrastructure behavior. `tests/identity` contains cross-package contract and
-real-provider evidence. `tests/process` contains released-process behavior.
+Each production package also has colocated `*_test.go` files for its values, policy, orchestration, parser, transition, retry, serialization, and private infrastructure behavior. `tests/identity` contains cross-package contract and real-provider evidence. `tests/process` contains released-process behavior.
 
 ## 12. Verification topology
 
@@ -596,39 +476,22 @@ real-provider evidence. `tests/process` contains released-process behavior.
 | `identity-regression` | Existing product staging suites | Current login journeys | Release |
 | `identity-release` | Protected release runner and clean OS machines | Signature, checksums, inventory, SBOM, provenance, install | Release |
 
-Nightly Auth0 protocol tests use a staging-only automated connection enabled
-only for the Platform staging application. Before release, the identity owner
-performs an attended system-browser journey through every approved real
-connection, including MFA where configured. No password, MFA seed, cookie, or
-browser profile enters CI or evidence.
+Nightly Auth0 protocol tests use a staging-only automated connection enabled only for the Platform staging application. Before release, the identity owner performs an attended system-browser journey through every approved real connection, including MFA where configured. No password, MFA seed, cookie, or browser profile enters CI or evidence.
 
-Privacy canaries must be absent from process arguments, ordinary environment,
-stdout, stderr, logs, metrics, traces, Sentry, crash output, SQLite, paths,
-support bundles, prompts, model context, hooks, and MCP messages. The Device
-Authorization user code is the sole intentional secret-like terminal output and
-is tested separately.
+Privacy canaries must be absent from process arguments, ordinary environment, stdout, stderr, logs, metrics, traces, Sentry, crash output, SQLite, paths, support bundles, prompts, model context, hooks, and MCP messages. The Device Authorization user code is the sole intentional secret-like terminal output and is tested separately.
 
 ## 13. Rollout and rollback
 
 1. Record the existing-flow baseline.
-2. Apply isolated staging Auth0 and Platform API resources through reviewed
-   infrastructure code.
+2. Apply isolated staging Auth0 and Platform API resources through reviewed infrastructure code.
 3. Run provider proofs and existing-product regressions.
 4. Release to internal staging users on the supported OS matrix.
 5. Enable GitHub workload identity after user sign-in is stable.
-6. Promote isolated production settings without changing shared defaults or
-   Actions unless separately approved.
+6. Promote isolated production settings without changing shared defaults or Actions unless separately approved.
 
-Rollback restores the previous released binary only when it can read the
-current identity schema. Otherwise promotion is blocked. Auth0 rollback disables
-rollout or restores isolated Platform settings while preserving identity
-resources and data. Deletion is a separate decommissioning or security-response
-procedure requiring impact, revocation, recovery, and owner approval.
+Rollback restores the previous released binary only when it can read the current identity schema. Otherwise promotion is blocked. Auth0 rollback disables rollout or restores isolated Platform settings while preserving identity resources and data. Deletion is a separate decommissioning or security-response procedure requiring impact, revocation, recovery, and owner approval.
 
-Rollout stops on an existing-flow regression, credential leak, audience
-crossover, cross-organization access, Drizz-caused refresh-family invalidation,
-unrecoverable vault behavior, failed supply-chain verification, or an unowned
-high-risk threat.
+Rollout stops on an existing-flow regression, credential leak, audience crossover, cross-organization access, Drizz-caused refresh-family invalidation, unrecoverable vault behavior, failed supply-chain verification, or an unowned high-risk threat.
 
 ## 14. Completion
 
@@ -636,13 +499,11 @@ Stage 3 is complete only when:
 
 - every slice inventory and exact external file manifest is satisfied;
 - existing login flows remain unchanged and pass regression;
-- supported real vaults, Auth0, Drizz Cloud, GitHub OIDC, CLI, MCP composition,
-  and desktop boundary evidence pass;
+- supported real vaults, Auth0, Drizz Cloud, GitHub OIDC, CLI, MCP composition, and desktop boundary evidence pass;
 - cross-process refresh, logout, crash recovery, and durable cleanup pass;
 - cloud authorization and cross-organization denial pass;
 - privacy canaries are absent from every prohibited boundary;
-- release artifacts have signatures, checksums, dependency inventory, SBOM,
-  provenance, and clean-machine verification;
+- release artifacts have signatures, checksums, dependency inventory, SBOM, provenance, and clean-machine verification;
 - all affected merge and release gates pass at recorded revisions; and
 - a fresh final diff passes independent architecture and security review.
 

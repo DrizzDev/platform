@@ -5,6 +5,9 @@ import (
 	"context"
 	"io"
 	"time"
+
+	metricnoop "go.opentelemetry.io/otel/metric/noop"
+	tracenoop "go.opentelemetry.io/otel/trace/noop"
 )
 
 // Patience is the wedge-recycle threshold, exposed for external tests.
@@ -34,10 +37,13 @@ func Scan(probe Probe) ([]byte, error) {
 // Attach builds a channel whose sessions run over caller-provided pipes instead of
 // a spawned process, so the transport and supervision are testable without a binary.
 func Attach(factory func(context.Context) (io.Writer, io.Reader, func() error)) *Channel {
+	duration, _ := metricnoop.NewMeterProvider().Meter("test").Float64Histogram("drizz.bridge.duration")
 	channel := &Channel{
-		options: Options{Timeout: 2 * time.Second},
-		slots:   make(chan struct{}, inflight),
-		done:    make(chan struct{}),
+		options:  Options{Timeout: 2 * time.Second},
+		slots:    make(chan struct{}, inflight),
+		done:     make(chan struct{}),
+		tracer:   tracenoop.NewTracerProvider().Tracer("test"),
+		duration: duration,
 	}
 	channel.build = func(scope context.Context) (*session, error) {
 		input, output, stop := factory(scope)

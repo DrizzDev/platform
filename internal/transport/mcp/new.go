@@ -26,12 +26,14 @@ func New(options Options) (Server, error) {
 		Logger:       options.External,
 		Capabilities: &protocol.ServerCapabilities{},
 	})
-	return Server{
+	drizz := Server{
 		server:   server,
 		duration: duration,
 		logger:   options.Logger,
 		tracer:   options.Tracer,
 		input:    options.Input,
 		output:   options.Output,
-	}, nil
+	}
+	drizz.register(options.Perform)
+	return drizz, nil
 }

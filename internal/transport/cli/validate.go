@@ -28,6 +28,9 @@ func (options Options) validate() error {
 	case options.Logout == nil:
 		return errors.New("CLI logout is required")
 
+	case options.Perform == nil:
+		return errors.New("CLI device capabilities are required")
+
 	default:
 		return nil
 	}

@@ -7,6 +7,9 @@ type Options struct {
 	Login     Session
 	Device    Session
 	Logout    Departure
+	Perform   Perform
+	Connect   Connector
+	Receiver  Receiver
 	Arguments []string
 	Streams   Streams
 	Release   release.Identity

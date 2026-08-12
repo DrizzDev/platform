@@ -6,13 +6,22 @@ import (
 	"testing"
 
 	"github.com/DrizzDev/platform/internal/device/application/control"
+	"github.com/DrizzDev/platform/internal/device/domain/app"
+	"github.com/DrizzDev/platform/internal/device/domain/bundle"
 	"github.com/DrizzDev/platform/internal/device/domain/capture"
 	"github.com/DrizzDev/platform/internal/device/domain/code"
 	"github.com/DrizzDev/platform/internal/device/domain/device"
+	"github.com/DrizzDev/platform/internal/device/domain/emulator"
 	"github.com/DrizzDev/platform/internal/device/domain/format"
+	"github.com/DrizzDev/platform/internal/device/domain/geo"
 	"github.com/DrizzDev/platform/internal/device/domain/image"
+	"github.com/DrizzDev/platform/internal/device/domain/parcel"
+	"github.com/DrizzDev/platform/internal/device/domain/pinch"
 	"github.com/DrizzDev/platform/internal/device/domain/platform"
+	"github.com/DrizzDev/platform/internal/device/domain/press"
 	"github.com/DrizzDev/platform/internal/device/domain/serial"
+	"github.com/DrizzDev/platform/internal/device/domain/swipe"
+	"github.com/DrizzDev/platform/internal/device/domain/text"
 	"github.com/DrizzDev/platform/internal/device/domain/touch"
 )
 
@@ -32,7 +41,103 @@ func (bridge bridge) Screenshot(context.Context, device.Device) (capture.Capture
 	return bridge.capture, bridge.failure
 }
 
+func (bridge bridge) Snapshot(context.Context, device.Device) (capture.Capture, string, error) {
+	return bridge.capture, "", bridge.failure
+}
+
+func (bridge bridge) Hierarchy(context.Context, device.Device) (string, error) {
+	return "", bridge.failure
+}
+
+func (bridge bridge) Dimensions(context.Context, device.Device) (int, int, error) {
+	return 0, 0, bridge.failure
+}
+
 func (bridge bridge) Tap(context.Context, touch.Touch) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Swipe(context.Context, swipe.Swipe) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Pinch(context.Context, pinch.Pinch) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Press(context.Context, press.Press) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Type(context.Context, text.Text) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Clear(context.Context, device.Device) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Back(context.Context, device.Device) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Home(context.Context, device.Device) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Locate(context.Context, geo.Fix) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Install(context.Context, parcel.Parcel) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Launch(context.Context, bundle.Bundle) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Terminate(context.Context, bundle.Bundle) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Wipe(context.Context, bundle.Bundle) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Installed(context.Context, device.Device) ([]app.App, error) {
+	return nil, bridge.failure
+}
+
+func (bridge bridge) Running(context.Context, device.Device) ([]app.App, error) {
+	return nil, bridge.failure
+}
+
+func (bridge bridge) Foreground(context.Context, device.Device) (string, error) {
+	return "", bridge.failure
+}
+
+func (bridge bridge) Url(context.Context, device.Device) (string, error) {
+	return "", bridge.failure
+}
+
+func (bridge bridge) Disk(context.Context, device.Device) (int, error) {
+	return 0, bridge.failure
+}
+
+func (bridge bridge) Images(context.Context, platform.Platform) ([]string, error) {
+	return nil, bridge.failure
+}
+
+func (bridge bridge) Boot(context.Context, emulator.Boot) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Pause(context.Context, device.Device) error {
+	return bridge.failure
+}
+
+func (bridge bridge) Resume(context.Context, device.Device) error {
 	return bridge.failure
 }
 

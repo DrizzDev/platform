@@ -2,8 +2,7 @@
 
 Status: Approved and mandatory
 
-This protocol keeps agent work ordered and recoverable during long sessions.
-The root [agent instructions](../../AGENTS.md) are the active entry point.
+This protocol keeps agent work ordered and recoverable during long sessions. The root [agent instructions](../../AGENTS.md) are the active entry point.
 
 ## Before work
 
@@ -12,9 +11,7 @@ The root [agent instructions](../../AGENTS.md) are the active entry point.
 3. Read the owning code and documents.
 4. Read the standards relevant to the change.
 5. Complete the design inventory below for the next implementation slice.
-6. Evaluate interface need, alternative implementations, implementation
-   coupling, independent testability, SRP, OCP, dependency direction, and future
-   module extraction.
+6. Evaluate interface need, alternative implementations, implementation coupling, independent testability, SRP, OCP, dependency direction, and future module extraction.
 7. Resolve material uncertainty before editing.
 
 ### Design inventory
@@ -34,9 +31,7 @@ Every implementation slice MUST identify:
 | Tests | Unit, contract, integration, process, failure, and recovery evidence |
 | Verification | Focused checks and the repository merge gate |
 
-The inventory may be part of an issue, pull request, implementation plan, or
-agent work record. It is not an ADR unless it makes a durable architectural
-decision. An unresolved field blocks implementation; `N/A` requires a reason.
+The inventory may be part of an issue, pull request, implementation plan, or agent work record. It is not an ADR unless it makes a durable architectural decision. An unresolved field blocks implementation; `N/A` requires a reason.
 
 ## During work
 
@@ -48,8 +43,7 @@ decision. An unresolved field blocks implementation; `N/A` requires a reason.
 6. Keep every project-owned Go source file within the 500-line hard limit.
 7. Run focused checks after each meaningful change.
 
-After compaction, handoff, correction, or a material scope change, rebuild
-context from the repository. Do not continue from narrative memory alone.
+After compaction, handoff, correction, or a material scope change, rebuild context from the repository. Do not continue from narrative memory alone.
 
 ## Before completion
 
@@ -57,8 +51,7 @@ context from the repository. Do not continue from narrative memory alone.
 2. Inspect fresh status and the complete diff.
 3. Compare the fresh diff with the slice design inventory.
 4. Run all available checks required by the changed area.
-5. Verify failure, recovery, security, compatibility, and resource behavior
-   where applicable.
+5. Verify failure, recovery, security, compatibility, and resource behavior where applicable.
 6. Report the result, exact check scope, risks, and unavailable checks.
 
 ## Evidence rules
@@ -66,6 +59,5 @@ context from the repository. Do not continue from narrative memory alone.
 - A scoped test is not a full-suite result.
 - A mock-only integration test is not proof of real integration.
 - A missing checker is unavailable evidence, not a passing check.
-- “Pre-existing,” “flaky,” and “unrelated” require reproduction and baseline
-  evidence.
+- “Pre-existing,” “flaky,” and “unrelated” require reproduction and baseline evidence.
 - A document or agent review is not machine enforcement.

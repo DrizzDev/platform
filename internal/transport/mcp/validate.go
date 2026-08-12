@@ -16,6 +16,8 @@ func (options Options) validate() error {
 		return errors.New("MCP input is required")
 	case options.Output == nil:
 		return errors.New("MCP output is required")
+	case options.Perform == nil:
+		return errors.New("MCP capability operator is required")
 	case options.Release.Name() == "":
 		return errors.New("MCP release identity is required")
 	default:

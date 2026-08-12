@@ -6,6 +6,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Channel is a supervised, long-lived stdio JSON-RPC conversation with the sidecar; the live session is an atomic
@@ -15,6 +18,9 @@ type Channel struct {
 
 	slots chan struct{}
 	done  chan struct{}
+
+	tracer   trace.Tracer
+	duration metric.Float64Histogram
 
 	stalls atomic.Int64
 	live   atomic.Pointer[session]
@@ -27,7 +33,10 @@ type Channel struct {
 	options Options
 }
 
-func (channel *Channel) Invoke(scope context.Context, request Request) (Response, error) {
+func (channel *Channel) Invoke(scope context.Context, request Request) (response Response, failure error) {
+	scope, gauge := channel.begin(scope, request.Method)
+	defer func() { gauge.close(scope, failure) }()
+
 	if channel.options.Timeout > 0 {
 		var cancel context.CancelFunc
 		scope, cancel = context.WithTimeout(scope, channel.options.Timeout)
@@ -45,7 +54,7 @@ func (channel *Channel) Invoke(scope context.Context, request Request) (Response
 	if failure != nil {
 		return Response{}, failure
 	}
-	response, failure := live.exchange(scope, request)
+	response, failure = live.exchange(scope, request)
 	channel.observe(failure)
 	return response, failure
 }
@@ -86,7 +95,10 @@ func (channel *Channel) ensure(scope context.Context) (*session, error) {
 	if time.Now().Before(channel.attempt) {
 		return nil, Unavailable{}
 	}
-	live, failure := channel.build(scope)
+	// The helper is long-lived and shared across requests, so it is started detached from the request that happens to
+	// trigger the start; otherwise that request's completion would tear the process down and the next call would pay
+	// to respawn it. Teardown is owned by Close and the timeout-recycle path through the session, not by this context.
+	live, failure := channel.build(context.WithoutCancel(scope))
 	if failure != nil {
 		channel.penalize()
 		return nil, failure

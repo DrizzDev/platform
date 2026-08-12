@@ -5,10 +5,13 @@ import (
 	"context"
 	"errors"
 	"io"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/DrizzDev/platform/internal/application/release"
+	"github.com/DrizzDev/platform/internal/capability/application/operator"
+	"github.com/DrizzDev/platform/internal/capability/domain/outcome"
 	"github.com/DrizzDev/platform/internal/identity/application/login"
 	"github.com/DrizzDev/platform/internal/identity/application/logout"
 	"github.com/DrizzDev/platform/internal/transport/cli"
@@ -27,6 +30,121 @@ type fixture struct {
 	session   cli.Session
 	device    cli.Session
 	logout    cli.Departure
+	perform   cli.Perform
+}
+
+type performer struct {
+	shot   operator.Shot
+	roster operator.Roster
+	fail   error
+}
+
+func (performer performer) Screenshot(context.Context, operator.Target) (operator.Shot, error) {
+	return performer.shot, performer.fail
+}
+
+func (performer performer) Snapshot(context.Context, operator.Target) (operator.Snapshot, error) {
+	return operator.Snapshot{}, performer.fail
+}
+
+func (performer performer) Hierarchy(context.Context, operator.Target) (operator.Tree, error) {
+	return operator.Tree{}, performer.fail
+}
+
+func (performer performer) Dimensions(context.Context, operator.Target) (operator.Extent, error) {
+	return operator.Extent{}, performer.fail
+}
+
+func (performer performer) Devices(context.Context) (operator.Roster, error) {
+	return performer.roster, performer.fail
+}
+
+func (performer performer) Install(context.Context, operator.Package) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Launch(context.Context, operator.Application) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Terminate(context.Context, operator.Application) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Wipe(context.Context, operator.Application) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Installed(context.Context, operator.Target) (operator.Listing, error) {
+	return operator.Listing{}, performer.fail
+}
+
+func (performer performer) Running(context.Context, operator.Target) (operator.Listing, error) {
+	return operator.Listing{}, performer.fail
+}
+
+func (performer performer) Foreground(context.Context, operator.Target) (operator.Report, error) {
+	return operator.Report{}, performer.fail
+}
+
+func (performer performer) Url(context.Context, operator.Target) (operator.Report, error) {
+	return operator.Report{}, performer.fail
+}
+
+func (performer performer) Disk(context.Context, operator.Target) (operator.Measure, error) {
+	return operator.Measure{}, performer.fail
+}
+
+func (performer performer) Images(context.Context) (operator.Images, error) {
+	return operator.Images{}, performer.fail
+}
+
+func (performer performer) Boot(context.Context, operator.Image) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Pause(context.Context, operator.Target) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Resume(context.Context, operator.Target) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Tap(context.Context, operator.Contact) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Swipe(context.Context, operator.Drag) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Pinch(context.Context, operator.Squeeze) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Press(context.Context, operator.Key) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Type(context.Context, operator.Entry) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Clear(context.Context, operator.Target) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Back(context.Context, operator.Target) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Home(context.Context, operator.Target) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Locate(context.Context, operator.Fix) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
 }
 
 func (run runner) Run(scope context.Context) error {
@@ -204,6 +322,72 @@ func TestSignout(test *testing.T) {
 	}
 }
 
+func TestScreenshot(test *testing.T) {
+	test.Parallel()
+
+	var output bytes.Buffer
+	command, failure := cli.New(fixture{
+		arguments: []string{"take-screenshot", "s-1"},
+		output:    &output,
+		perform:   performer{shot: operator.Shot{Image: []byte("png-bytes"), Format: "PNG"}},
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if failure := command.Run(context.Background()); failure != nil {
+		test.Fatal(failure)
+	}
+	path := strings.TrimSpace(output.String())
+	if !strings.HasSuffix(path, ".png") {
+		test.Fatalf("printed path = %q", path)
+	}
+	written, failure := os.ReadFile(path)
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	_ = os.Remove(path)
+	if string(written) != "png-bytes" {
+		test.Fatalf("written = %q", written)
+	}
+}
+
+func TestDevices(test *testing.T) {
+	test.Parallel()
+
+	var output bytes.Buffer
+	command, failure := cli.New(fixture{
+		arguments: []string{"list-devices"},
+		output:    &output,
+		perform:   performer{roster: operator.Roster{Serials: []string{"s-1", "s-2"}}},
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if failure := command.Run(context.Background()); failure != nil {
+		test.Fatal(failure)
+	}
+	if !strings.Contains(output.String(), "s-1") || !strings.Contains(output.String(), "s-2") {
+		test.Fatalf("output = %q", output.String())
+	}
+}
+
+func TestScreenshotRefused(test *testing.T) {
+	test.Parallel()
+
+	command, failure := cli.New(fixture{
+		arguments: []string{"take-screenshot", "s-9"},
+		output:    io.Discard,
+		perform:   performer{fail: operator.Refusal{Code: outcome.Missing}},
+	}.options())
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	failure = command.Run(context.Background())
+	if failure == nil || !strings.Contains(failure.Error(), "not found") {
+		test.Fatalf("refused screenshot = %v", failure)
+	}
+}
+
 func (fixture fixture) options() cli.Options {
 	identity, _ := release.New(release.Input{
 		Name:     "drizz",
@@ -222,6 +406,14 @@ func (fixture fixture) options() cli.Options {
 	if farewell == nil {
 		farewell = exit(func(context.Context) (logout.Result, error) { return logout.Result{}, nil })
 	}
+	perform := fixture.perform
+	if perform == nil {
+		perform = performer{}
+	}
+	server := fixture.server
+	if server == nil {
+		server = runner(func(context.Context) error { return nil })
+	}
 	return cli.Options{
 		Arguments: fixture.arguments,
 		Streams: cli.Streams{
@@ -230,9 +422,10 @@ func (fixture fixture) options() cli.Options {
 			Failure: io.Discard,
 		},
 		Release: identity,
-		MCP:     fixture.server,
+		MCP:     server,
 		Login:   session,
 		Device:  passcode,
 		Logout:  farewell,
+		Perform: perform,
 	}
 }

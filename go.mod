@@ -10,6 +10,7 @@ require (
 	github.com/getsentry/sentry-go/otel v0.48.0
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/modelcontextprotocol/go-sdk v1.7.0
+	github.com/pelletier/go-toml/v2 v2.3.1
 	github.com/samber/slog-sentry/v2 v2.11.0
 	github.com/spf13/cobra v1.10.2
 	github.com/zalando/go-keyring v0.2.8
@@ -179,7 +180,6 @@ require (
 	github.com/nishanths/predeclared v0.2.2 // indirect
 	github.com/nunnatsa/ginkgolinter v0.23.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
-	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.12.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
