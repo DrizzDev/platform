@@ -28,7 +28,11 @@ func (server Server) observations(perform Perform) {
 				return server.refuse(failure), nil, nil
 			}
 			image := &protocol.ImageContent{Data: shot.Image, MIMEType: mime + strings.ToLower(shot.Format)}
-			return &protocol.CallToolResult{Content: []protocol.Content{image, &protocol.TextContent{Text: shot.Hierarchy}}}, nil, nil
+			content := []protocol.Content{image, &protocol.TextContent{Text: shot.Hierarchy}}
+			if note, failure := server.keep(artifact{extension: shot.Format, content: shot.Image}); failure == nil {
+				content = append(content, note)
+			}
+			return &protocol.CallToolResult{Content: content}, nil, nil
 		})
 
 	tree, _ := shelf.Lookup(catalog.Hierarchy)
@@ -38,7 +42,11 @@ func (server Server) observations(perform Perform) {
 			if failure != nil {
 				return server.refuse(failure), nil, nil
 			}
-			return &protocol.CallToolResult{Content: []protocol.Content{&protocol.TextContent{Text: read.Hierarchy}}}, nil, nil
+			content := []protocol.Content{&protocol.TextContent{Text: read.Hierarchy}}
+			if note, failure := server.keep(artifact{extension: "xml", content: []byte(read.Hierarchy)}); failure == nil {
+				content = append(content, note)
+			}
+			return &protocol.CallToolResult{Content: content}, nil, nil
 		})
 
 	size, _ := shelf.Lookup(catalog.Dimensions)

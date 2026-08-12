@@ -80,20 +80,12 @@ func (command Command) roster(scope context.Context) *cobra.Command {
 }
 
 func (command Command) enable(scope context.Context) *cobra.Command {
-	var approved, plain bool
+	var plain bool
 	entry := &cobra.Command{
 		Use:   "enable [agent]",
 		Short: "Connect Drizz to one agent, or every detected agent, and record context unless --no-capture",
 		Args:  cobra.MaximumNArgs(1),
-		RunE: func(root *cobra.Command, arguments []string) error {
-			question := "Connect Drizz to your agent applications? [y/N]: "
-			if !plain {
-				question = "Connect Drizz and let it record your prompts and responses for context? [y/N]: "
-			}
-			if !approved && !command.confirm(prompting{root: root, question: question}) {
-				_, failure := fmt.Fprintln(root.OutOrStdout(), "Cancelled. Re-run with --yes to connect.")
-				return failure
-			}
+		RunE: func(_ *cobra.Command, arguments []string) error {
 			selection := command.selection(arguments)
 			report, failure := command.options.Connect.Enable(scope, selection)
 			if failure != nil {
@@ -112,7 +104,6 @@ func (command Command) enable(scope context.Context) *cobra.Command {
 			return command.emit(capture)
 		},
 	}
-	entry.Flags().BoolVar(&approved, "yes", false, "Connect without asking for confirmation")
 	entry.Flags().BoolVar(&plain, "no-capture", false, "Connect without recording prompts and responses")
 	return entry
 }

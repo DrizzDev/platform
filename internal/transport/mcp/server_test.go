@@ -253,7 +253,7 @@ func TestScreenshotTool(test *testing.T) {
 	if failure != nil {
 		test.Fatal(failure)
 	}
-	if result.IsError || len(result.Content) != 1 {
+	if result.IsError || len(result.Content) != 2 {
 		test.Fatalf("result = %#v", result)
 	}
 	image, valid := result.Content[0].(*protocol.ImageContent)
@@ -262,6 +262,10 @@ func TestScreenshotTool(test *testing.T) {
 	}
 	if string(image.Data) != "png-bytes" || image.MIMEType != "image/png" {
 		test.Fatalf("image = %#v", image)
+	}
+	note, valid := result.Content[1].(*protocol.TextContent)
+	if !valid || !strings.Contains(note.Text, "Saved to ") {
+		test.Fatalf("expected a saved-path note, got %#v", result.Content[1])
 	}
 }
 
