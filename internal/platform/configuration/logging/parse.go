@@ -7,8 +7,8 @@ import (
 
 func New(value string) (Settings, error) {
 	switch Level(strings.ToUpper(value)) {
-	case "":
-		return Settings{level: Info}, nil
+	case "", Off:
+		return Settings{level: Off}, nil
 	case Debug:
 		return Settings{level: Debug}, nil
 	case Info:
@@ -18,6 +18,6 @@ func New(value string) (Settings, error) {
 	case Error:
 		return Settings{level: Error}, nil
 	default:
-		return Settings{}, errors.New("DRIZZ_LOG_LEVEL must be one of debug, info, warn, error")
+		return Settings{}, errors.New("DRIZZ_LOG_LEVEL must be one of off, debug, info, warn, error")
 	}
 }

@@ -9,10 +9,27 @@ import (
 
 	"github.com/DrizzDev/platform/internal/capability/application/operator"
 	"github.com/DrizzDev/platform/internal/capability/domain/catalog"
+	"github.com/DrizzDev/platform/internal/platform/filesystem"
 )
 
 // mime is the media-type prefix for the captured image content returned to the agent.
 const mime = "image/"
+
+// artifact is a captured file to persist so the agent receives a path to work with, not only inline bytes.
+type artifact struct {
+	extension string
+	content   []byte
+}
+
+// keep writes a captured artifact to a file and returns a note with its path, so the agent can reference the file
+// rather than reaching for the device's native tooling.
+func (Server) keep(item artifact) (*protocol.TextContent, error) {
+	path, failure := filesystem.New().Save(filesystem.File{Extension: strings.ToLower(item.extension), Content: item.content})
+	if failure != nil {
+		return nil, failure
+	}
+	return &protocol.TextContent{Text: "Saved to " + path}, nil
+}
 
 // snapshot is the input to the screenshot tool. Its schema is inferred from these fields.
 type snapshot struct {
@@ -45,7 +62,11 @@ func (server Server) register(perform Perform) {
 				return server.refuse(failure), nil, nil
 			}
 			image := &protocol.ImageContent{Data: shot.Image, MIMEType: mime + strings.ToLower(shot.Format)}
-			return &protocol.CallToolResult{Content: []protocol.Content{image}}, nil, nil
+			content := []protocol.Content{image}
+			if note, failure := server.keep(artifact{extension: shot.Format, content: shot.Image}); failure == nil {
+				content = append(content, note)
+			}
+			return &protocol.CallToolResult{Content: content}, nil, nil
 		})
 
 	protocol.AddTool(server.server, &protocol.Tool{Name: list.Title(), Description: list.Summary()},

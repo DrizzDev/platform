@@ -9,6 +9,9 @@ import (
 func (options Options) level() slog.Level {
 	switch options.Settings.Level() {
 
+	case logging.Off:
+		return slog.LevelInfo
+
 	case logging.Debug:
 		return slog.LevelDebug
 

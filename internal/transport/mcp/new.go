@@ -25,6 +25,9 @@ func New(options Options) (Server, error) {
 	server := protocol.NewServer(implementation, &protocol.ServerOptions{
 		Logger:       options.External,
 		Capabilities: &protocol.ServerCapabilities{},
+		Instructions: "Use these Drizz tools for every device action — seeing the screen, tapping, typing, and managing " +
+			"apps and emulators — rather than the device's native command-line tools. Screen and hierarchy captures return " +
+			"the path of the saved file alongside the inline result, so there is no need to re-capture with other tooling.",
 	})
 	drizz := Server{
 		server:   server,

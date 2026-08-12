@@ -16,7 +16,7 @@ func TestRecord(test *testing.T) {
 	test.Parallel()
 
 	var output bytes.Buffer
-	settings, failure := logging.New("")
+	settings, failure := logging.New("debug")
 	if failure != nil {
 		test.Fatal(failure)
 	}
@@ -69,7 +69,7 @@ func TestSource(test *testing.T) {
 	test.Parallel()
 
 	var output bytes.Buffer
-	settings, failure := logging.New("")
+	settings, failure := logging.New("debug")
 	if failure != nil {
 		test.Fatal(failure)
 	}
@@ -106,7 +106,7 @@ func TestRedaction(test *testing.T) {
 	test.Parallel()
 
 	var output bytes.Buffer
-	settings, failure := logging.New("")
+	settings, failure := logging.New("debug")
 	if failure != nil {
 		test.Fatal(failure)
 	}
@@ -150,7 +150,7 @@ func TestNested(test *testing.T) {
 	test.Parallel()
 
 	var output bytes.Buffer
-	settings, failure := logging.New("")
+	settings, failure := logging.New("debug")
 	if failure != nil {
 		test.Fatal(failure)
 	}

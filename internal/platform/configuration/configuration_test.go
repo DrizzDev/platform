@@ -16,7 +16,7 @@ func TestDefaults(test *testing.T) {
 	if failure != nil {
 		test.Fatal(failure)
 	}
-	if settings.Logging().Level() != logging.Info {
+	if settings.Logging().Level() != logging.Off {
 		test.Fatalf("level = %v", settings.Logging().Level())
 	}
 	if settings.Telemetry().Exporter() != telemetry.None {
