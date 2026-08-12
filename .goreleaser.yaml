@@ -45,10 +45,11 @@ homebrew_casks:
     homepage: "https://drizz.dev"
     description: "Drive connected devices from AI coding assistants and the command line, recorded locally."
 
+# The binaries are published to a public releases repo so end users can download them while the source stays private.
 release:
   github:
     owner: DrizzDev
-    name: platform
+    name: releases
 
 changelog:
   disable: true
