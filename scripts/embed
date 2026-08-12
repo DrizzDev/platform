@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Inject the compiled device helper for one target into the carrier's embedded asset, so a release build carries the
+# real helper instead of the committed placeholder. This overwrites a tracked file; restore it after the build with:
+#   git checkout -- internal/device/infrastructure/carrier/asset
+#
+# Usage: scripts/embed <goos> <goarch> <helper-dir>
+#   <helper-dir> is the device-helper compile output root (its scripts/compile writes <goos>_<goarch>/bridge[.exe]
+#   and the matching .sha256).
+set -euo pipefail
+
+goos="${1:?usage: scripts/embed <goos> <goarch> <helper-dir>}"
+goarch="${2:?usage: scripts/embed <goos> <goarch> <helper-dir>}"
+source="${3:?usage: scripts/embed <goos> <goarch> <helper-dir>}"
+
+name="bridge"; [ "$goos" = "windows" ] && name="bridge.exe"
+binary="$source/${goos}_${goarch}/$name"
+digest="$binary.sha256"
+[ -f "$binary" ] || { echo "embed: missing helper $binary" >&2; exit 1; }
+[ -f "$digest" ] || { echo "embed: missing digest $digest" >&2; exit 1; }
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+dest="$root/internal/device/infrastructure/carrier/asset"
+cp "$binary" "$dest/bridge"
+cp "$digest" "$dest/bridge.sha256"
+echo "embed: $goos/$goarch helper carried ($(wc -c < "$dest/bridge") bytes)"

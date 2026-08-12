@@ -117,6 +117,21 @@ func TestKind(test *testing.T) {
 	}
 }
 
+func TestUnsupported(test *testing.T) {
+	test.Parallel()
+
+	driver := fixture{test: test, handler: func(request call) response {
+		return response{Version: "2.0", ID: request.ID,
+			Error: &defect{Code: -32000, Message: "pressButton is not supported", Data: carrier{Kind: "UnsupportedOperationError"}}}
+	}}.driver()
+	defer func() { _ = driver.Close() }()
+
+	_, failure := driver.Screenshot(context.Background(), maker{test: test}.target())
+	if !errors.Is(failure, control.Incompatible{}) {
+		test.Fatalf("an unsupported operation must map to the incompatible outcome, got %v", failure)
+	}
+}
+
 func TestMalformed(test *testing.T) {
 	test.Parallel()
 

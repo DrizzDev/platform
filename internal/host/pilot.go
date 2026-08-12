@@ -2,6 +2,7 @@ package host
 
 import (
 	"context"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/DrizzDev/platform/internal/capture/application/recording"
 	"github.com/DrizzDev/platform/internal/device/application/control"
 	"github.com/DrizzDev/platform/internal/device/infrastructure/bridge"
+	"github.com/DrizzDev/platform/internal/device/infrastructure/carrier"
 	"github.com/DrizzDev/platform/internal/device/infrastructure/sidecar"
 	"github.com/DrizzDev/platform/internal/platform/observability"
 	"github.com/DrizzDev/platform/internal/transport/cli"
@@ -287,16 +289,17 @@ func (foundation foundation) assemble(scope context.Context) (operator.Operator,
 	}
 	idle := func() {}
 
-	handle, ready := sidecar.New(foundation.environment).Locate()
-	if !ready {
-		return operator.Operator{}, idle, operator.Refusal{Code: outcome.Unprepared}
-	}
-
 	_, observer, failure := foundation.provision(scope)
 	if failure != nil {
 		return operator.Operator{}, idle, failure
 	}
 	closers = append(closers, func() { session{observer: observer}.shutdown(scope) })
+
+	handle, failure := foundation.resolve(scope, observer)
+	if failure != nil {
+		release()
+		return operator.Operator{}, idle, operator.Refusal{Code: outcome.Unprepared}
+	}
 
 	recorder, store, failure := foundation.recorder(scope, observer)
 	if failure != nil {
@@ -324,6 +327,26 @@ func (foundation foundation) assemble(scope context.Context) (operator.Operator,
 		return operator.Operator{}, idle, failure
 	}
 	return engine, release, nil
+}
+
+// helper resolves the device helper: an explicit environment override wins for development and continuous integration;
+// otherwise the helper carried inside the binary is materialized and verified. A build with no carried helper, or a
+// carried helper that cannot be materialized, leaves the device capability unprepared.
+func (foundation foundation) resolve(scope context.Context, observer observability.Provider) (sidecar.Handle, error) {
+	if handle, ready := sidecar.New(foundation.environment).Locate(); ready {
+		return handle, nil
+	}
+	made, failure := carrier.New()
+	if failure != nil {
+		observer.Diagnostics().WarnContext(scope, "device.helper.unavailable", slog.Any("error", failure))
+		return sidecar.Handle{}, failure
+	}
+	location, failure := made.Materialize()
+	if failure != nil {
+		observer.Diagnostics().WarnContext(scope, "device.helper.unavailable", slog.Any("error", failure))
+		return sidecar.Handle{}, failure
+	}
+	return sidecar.Handle{Location: location, Digest: made.Digest()}, nil
 }
 
 // equipment carries the assembled parts an operator is built from, so they pass through one typed input rather than a

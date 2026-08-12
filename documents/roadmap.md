@@ -1,16 +1,16 @@
 # Delivery Roadmap
 
-Status: Approved delivery baseline
+Status: Approved delivery baseline (revised)
 
-Current position: the foundation review and application skeleton are complete. Authentication and authorization are the next delivery stage.
+Current position: foundation, application skeleton, and authentication are complete. The device journey, execution capture, and agent integration with the full first capability set are built and proven green. The next delivery stage is packaging the result into one installable binary and shipping the first version to the team.
 
 This roadmap describes delivery order. It does not approve public tools, contracts, architecture decisions, dependencies, staffing, or dates.
 
 ## 1. First release outcome
 
-A user can install Drizz, authenticate, connect it to a supported MCP client, use approved local device capabilities through an external agent, and see the required execution record synchronized with Drizz.
+A user can install Drizz with one standard command, authenticate, connect it to a supported MCP client, and use the approved local device capabilities — on Android and iOS — through an external agent, with every action recorded locally. Synchronizing those records to Drizz's cloud is real product behaviour but is deliberately a later step; the first release is complete and useful without it.
 
-CLI and desktop reuse the same application behavior. External agents own planning.
+The command line and the desktop reuse the same application behaviour. External agents own planning.
 
 ## 2. Planning rules
 
@@ -28,289 +28,108 @@ CLI and desktop reuse the same application behavior. External agents own plannin
 | 1 | Reviewed product and integration foundation | None |
 | 2 | Installable application skeleton with MCP and CLI entry points | Stage 1 |
 | 3 | Reusable authentication and authorization context | Stage 2 |
-| 4 | One real Android device journey | Stage 3 |
-| 5 | Durable execution capture, records, and synchronization | Stage 4 |
-| 6 | Claude and Codex integration with the approved first capability set | Stage 5 |
-| 7 | Approved deterministic authoring behavior | Stage 6 |
-| 8 | iOS support through the same capability path | Stages 4–7 |
-| 9 | Desktop integration and supported release | Stages 3–8 |
-| 10 | Additional Drizz product capabilities | Stable released foundation |
+| 4 | First real device journey — Android and iOS through one neutral path | Stage 3 |
+| 5 | Durable execution capture and local records; cloud synchronization | Stage 4 |
+| 6 | Agent integration with the approved first capability set, on both platforms | Stage 5 |
+| 7 | Packaged, installable, supported release — the first shippable version | Stage 6 |
+| 8 | Additional product capabilities, added incrementally | Stage 7 |
+| 9 | Deterministic authoring | Stage 8 |
 
-Stage 3 implements [Authentication and Authorization](authentication.md) and [ADR 0006](decisions/0006-authentication.md) through the [Stage 3 Authentication Implementation Plan](plans/authentication.md). Stages 5 and 6 implement [Agent Integration and Execution Capture](capture.md) and [ADR 0007](decisions/0007-capture.md). The sections below are the implementation plans for those approved architectures; they do not create parallel plans elsewhere.
+Two revisions from the original baseline are folded in here and explained below:
 
-## 4. Stage 1: Foundation review
+- **iOS is not a separate stage.** The Device port is platform-neutral and the device helper already drives Android and iOS; every capability routes by the device's own platform. iOS is therefore delivered inside Stages 4 and 6, not as a later stage of its own. The only iOS-specific work is threading the platform through the emulator/simulator commands and testing on Apple hardware — both part of the device work, not a new architecture.
+- **Packaging is pulled forward and is the first shippable version.** Turning the two programs Drizz is built from into one installable binary, delivered through standard channels, is what lets the team actually use it. It becomes Stage 7 — the first release — rather than being bundled with far-later work. **Deterministic authoring is moved to the end** (Stage 9): it is added after the team is using the released product, alongside other new capabilities, one at a time.
 
-### Goal
+Stage 3 implements [Authentication and Authorization](authentication.md) and [ADR 0006](decisions/0006-authentication.md) through the [Stage 3 Authentication Implementation Plan](plans/authentication.md). Stages 5 and 6 implement [Agent Integration and Execution Capture](capture.md) and [ADR 0007](decisions/0007-capture.md). Stage 7 follows the [Packaging and Distribution Plan](plans/packaging.md). The sections below are the delivery record and plan for those architectures; they do not create parallel plans elsewhere.
 
-Replace assumptions with evidence from the existing Drizz systems and approve only the decisions needed for the first implementation.
+## 4. Stage 1: Foundation review — complete
 
-### Work
+Evidence-backed audit of the existing Drizz device and desktop systems, a proven MCP stdio connection to Claude and Codex, proven Go supervision of the required local providers, the approved first journey, and accepted foundational decision records. Complete.
 
-- Confirm the first user journey and non-goals.
-- Confirm that the approved Platform authentication design can be added without changing existing Drizz login flows.
-- Audit Android and iOS device integrations, supported operations, lifecycle, errors, concurrency, and packaging.
-- Audit how the current desktop application can start, update, and communicate with the Drizz application.
-- Classify existing authoring behavior into agent-owned planning, reusable deterministic behavior, cloud-owned behavior, and excluded behavior.
-- Prove that the official Go MCP SDK connects over standard input/output to Claude, Codex, and a generic client.
-- Review the official plugin, hook, and structured-event surfaces for Claude and Codex and separate them from SDK instrumentation.
-- Prove that Go can supervise every required existing local provider.
-- Define supported operating systems and architectures.
-- Review the security and privacy boundaries.
-- Approve or reject the architecture and initial stack recommendations.
+## 5. Stage 2: Application skeleton — complete
 
-### Evidence
+The smallest installable application: one composition entry point, signal handling and clean shutdown, typed configuration, structured diagnostics that never contaminate MCP standard output, minimal MCP and CLI adapters over one use case, build metadata, and the full verification pipeline (format, lint, unit, race, dependency, secret, file-size, architecture-boundary, and build checks). Complete.
 
-- source-backed audit notes with repository revision;
-- working MCP connection proof;
-- working provider-supervision proof;
-- approved first journey;
-- reviewed open-decision list;
-- accepted or revised foundational decision records.
+## 6. Stage 3: Authentication and authorization — complete
 
-### Exit
+One authenticated context reusable by MCP, CLI, and the desktop boundary: system-browser Authorization Code with PKCE by default, Device Authorization as the headless fallback, durable credentials in the operating-system credential store, trusted identity and organization derived outside interface input and revalidated at the cloud boundary. Merged and proven live. The isolated CI workload identity is deferred until a workload actually needs it.
 
-The repository owner approves the first journey and the technical owners agree that no unresolved issue blocks the application skeleton, authentication, or first device proof.
-
-## 5. Stage 2: Application skeleton
+## 7. Stage 4: First device journey — Android and iOS through one neutral path
 
 ### Goal
 
-Create the smallest installable application that proves lifecycle and interface composition without duplicating product behavior.
+Execute the approved observations and actions on a real device through the shared application core, on **both** Android and iOS, behind one platform-neutral Device port.
 
 ### Work
 
-- Pin the approved Go toolchain and module.
-- Add one composition entry point.
-- Implement signal handling, cancellation, shutdown, and stable exit behavior.
-- Implement typed configuration with explicit precedence.
-- Implement structured diagnostics without contaminating MCP standard output.
-- Add minimal MCP and CLI adapters over one application use case.
-- Add build metadata and version reporting.
-- Establish formatting, static analysis, unit testing, race testing, dependency review, secret scanning, file-size enforcement, architecture-boundary checks, and build checks.
-- Produce unsigned development artifacts for the approved platform matrix.
+- Define device identity, session ownership, discovery, connect, disconnect, and reconnect.
+- Define the platform-neutral device contract without hiding platform behaviour; every request routes by the device's own platform (Android, iOS device, iOS simulator).
+- Integrate the existing device helper through an adapter over stdio JSON-RPC; supervise it, bound its subprocesses, output, memory, and concurrency, and pin its digest.
+- The device helper manages the on-device components itself — installing Drizz's instrumentation on Android, building and provisioning WebDriverAgent on iOS — and detects and guides on missing host toolchains (`adb`, Xcode) rather than failing opaquely.
+- Thread the platform through the emulator and simulator commands so device management is not Android-only.
+- Capture only the evidence the product journey requires.
+- Test disconnect, stale device, locked device, application and provider crash, cancellation, and restart on real Android and iOS targets.
 
-### Exit
+### Status
 
-A clean checkout runs one verification command and builds the development application. MCP and CLI invoke the same non-destructive application behavior.
+The neutral port, the helper adapter, supervision, digest pinning, and the read and interaction commands are built and proven on a real Android device. iOS routes through the same commands today; the remaining device work is the simulator/emulator platform threading and the live pass on Apple hardware.
 
-## 6. Stage 3: Authentication and authorization
+## 8. Stage 5: Capture, local records, and synchronization
 
 ### Goal
 
-Provide one authenticated context reusable by MCP, CLI, desktop, and future approved interfaces.
+Preserve the required capability and agent execution history locally, then synchronize it to Drizz without adding a cloud round trip to each local device step.
 
-### Work
+### Work and status
 
-- Create the isolated Auth0 Platform Native Application and Platform API.
-- Implement system-browser Authorization Code with PKCE as the default native sign-in flow.
-- Implement Device Authorization as the explicit headless fallback.
-- Store durable credentials in the operating-system credential store.
-- Keep short-lived session material in memory where practical.
-- Reuse the same identity service from CLI, local MCP, and the desktop test boundary without exposing credentials to an agent.
-- Derive trusted identity and organization context outside interface input.
-- Revalidate cloud authorization at the cloud boundary.
-- Add workload identity federation for the first approved CI provider and an isolated Client Credentials fallback only if required.
-- Define offline behavior explicitly.
-- Handle expired, revoked, missing, corrupted, and organization-changed credentials.
-- Test browser interruption, callback failure, restart, concurrent login, logout, refresh rotation, revocation, and credential-store denial.
-- Regression-test every existing Drizz login flow affected by shared Auth0 Actions or tenant policy.
-- Verify the same authenticated context through MCP, CLI, and the desktop test boundary.
-
-### Delivery slices
-
-The exact slice order, design inventory, planned ownership, contracts, state, failures, files, tests, evidence, rollout, and rollback are defined only in the [Stage 3 Authentication Implementation Plan](plans/authentication.md).
-
-Stage 3 prepares the shared identity application for CLI, MCP capability adapters, and the desktop boundary. It does not add a public MCP tool merely to test authentication. The first authenticated public capability provides the real MCP invocation proof in Stage 6.
+- The typed capture contract, source and fidelity model, classification, consent, retention, and limits are **approved and built**.
+- The local stores — an ordered SQLite journal and a content-addressed artifact store — are **built and qualified** under concurrent processes, crash, migration, corruption, and disk pressure.
+- Capability intent and outcome are **recorded inside the shared application path** below MCP and CLI, so every interface produces the same authoritative facts. Host-side agent context (prompts, responses) is recorded through the hook path as an inferred host observation, never relabelled as an exact Drizz event.
+- **Cloud synchronization is the remaining piece and may land after the first release.** It targets Drizz's own backend API — authenticated with the user's token, organization-authorized — never a direct client-to-object-store write. Large artifacts use short-lived backend-issued upload URLs; storage stays server-controlled and the client never holds cloud credentials. Synchronization is idempotent by identity, resumable after restart and partial upload, and reclaims local disk only after the cloud acknowledges.
 
 ### Exit
 
-One user can sign in and out safely on every supported operating system. The shared identity application is composed for future MCP capability adapters without exposing credentials to the MCP client or model. An approved CI workload can authenticate without a human token. Interface input cannot override trusted identity or organization context. Every completion gate in the Stage 3 implementation plan passes.
+Local records are durable and correct today. Once synchronization is enabled, the first device journey appears in the required Drizz surface, repeated delivery does not duplicate cloud effects, unrelated agent sessions are not uploaded, and local storage stays bounded without deleting required evidence.
 
-## 7. Stage 4: First local device journey
+## 9. Stage 6: Agent integration and the first capability set — built
 
 ### Goal
 
-Execute one approved observation and one approved action on a real Android target through the shared application core.
+Expose the approved first-release capabilities consistently through the command line and the supported Claude, Codex, and other MCP clients, on both platforms, with native installation and optional host-context capture.
 
-### Work
+### Status
 
-- Define device identity and session ownership.
-- Define discovery, connect, disconnect, and reconnect behavior.
-- Define the platform-neutral device contract without hiding Android behavior.
-- Select one low-risk observation and one representative action.
-- Define input, output, cancellation, timeout, and error behavior.
-- Build the application-owned device interface.
-- Integrate the existing Android implementation through an adapter.
-- Bound subprocesses, output, memory, concurrency, and device ownership.
-- Capture only the evidence required by the product journey.
-- Test disconnect, stale device, locked device, application crash, provider crash, cancellation, and restart on real targets.
+Built and proven green. One transport-neutral catalog is the single source for the full device command set; the agent connection (MCP) and the command line each render from it. A single `drizz connect` command wires Drizz into an agent's configuration without disturbing other settings, across every supported agent, and a separate opt-in step registers turn-event hooks that record prompt and response context. Every flow emits traces, metrics, and structured logs, with privacy canaries proving device content and prompts never reach telemetry.
 
-### Exit
+The remaining Stage 6 work is run alongside Stage 7: the live install→invoke→capture pass against the actual Claude and Codex applications, and the live device pass on the few state-changing and emulator commands.
 
-The approved journey works locally on a real supported Android target with deterministic errors and recovery.
-
-## 8. Stage 5: Capture, records, and synchronization
+## 10. Stage 7: Packaged, installable, supported release — the first shippable version
 
 ### Goal
 
-Preserve the required capability and agent execution history and synchronize it without adding a cloud round trip to each local device step.
+Deliver Drizz as **one installable binary** that carries the device helper inside it, through standard channels, so a person installs it with one command and connects an agent without any manual setup. This is the first version shared with the team.
 
 ### Work
 
-- Define which execution facts, tool calls, assets, failures, and agent-provided context Drizz is allowed and required to store.
-- Define one typed Drizz capture contract for agent events and authoritative capability events. It must record source, fidelity, ordering, and correlation without adopting a provider or observability schema.
-- Define bounded pending capture so unrelated Claude or Codex conversations are not retained or synchronized when they never invoke Drizz.
-- Define data classification, redaction, consent, and retention.
-- Define the cloud synchronization contract and idempotency behavior.
-- Select local metadata and artifact storage after a real persistence proof.
-- Commit execution state and synchronization intent safely.
-- Resume after process termination, machine restart, sleep, and network loss.
-- Handle duplicate requests, partial upload, server rejection, and version mismatch.
-- Verify cloud acknowledgement before cleanup eligibility.
-- Protect active, referenced, failed, and unsynchronized artifacts.
-- Enforce disk budgets and observable cleanup.
-- Instrument the shared capability core below MCP and CLI so every interface produces the same authoritative execution facts.
-- Prove exact and inferred correlation behavior without representing an inferred host relationship as exact.
-- Test corruption, disk full, clock changes, competing processes, and upgrade.
-
-### Delivery slices
-
-1. Approve the typed capture contract, source and fidelity model, classification, consent, retention, and limits.
-2. Prove the accepted SQLite and artifact design under concurrent processes, crash, migration, corruption, and disk pressure.
-3. Record capability intent and outcome inside the shared application path below MCP and CLI.
-4. Implement idempotent event and artifact synchronization with restart and partial-upload recovery.
-5. Implement acknowledgement-based cleanup, leases, budgets, and protection for active or unsynchronized evidence.
-6. Prove bounded pending agent context and exact versus inferred correlation in preparation for supported host adapters.
+- Compile the device helper into a single self-contained native executable per operating system and architecture, and embed the matching helper — and its pinned digest — into the platform binary at build time.
+- On first use, extract the embedded helper to a protected per-user location, verify its digest, and run it; keep the environment-variable override for development and continuous integration.
+- Produce the standard install experiences with one release tool: a Homebrew tap (`brew install`), a shell installer (`curl … | sh`), and the equivalent on Windows — plus archives and checksums.
+- Sign binaries, and notarize where a channel requires it; for the command line delivered through Homebrew and the shell installer, this is largely unnecessary and is deferred until a channel needs it.
+- Define install, update, rollback, downgrade, and uninstall behaviour, including what happens to local records and credentials on removal.
+- Run the supported operating-system and client matrix, including the live Claude and Codex install→invoke→capture journey and the live device pass, and qualify the first release.
 
 ### Exit
 
-The first device journey appears in the required Drizz surface after synchronization. Its source and capture fidelity are explicit, repeated delivery does not duplicate cloud effects, unrelated agent sessions are not uploaded, and local storage remains bounded without deleting required evidence.
+A person installs Drizz with one standard command, connects Claude or Codex, uses the full device capability set on Android or iOS without manually starting anything, and removes the integration cleanly. This is the version the team uses.
 
-## 9. Stage 6: First agent integration and capability set
+## 11. Stage 8: Additional product capabilities
 
-### Goal
+New product areas — reporting, debugging aids, application management, and others — are added as separate vertical outcomes, one at a time, on the released foundation. A capability that reads cloud-held data rather than a local device may be delivered as a hosted, link-based MCP server instead of the local binary. Each capability reuses the same authentication and application boundaries, enforces organization and resource authorization in Drizz services, reuses execution, artifact, synchronization, and cleanup behaviour where its semantics match, defines its own approved product contract, and works through every interface its requirement names.
 
-Expose the approved first-release capabilities consistently through CLI and the supported Claude and Codex MCP clients, with native installation and available host context capture.
+## 12. Stage 9: Deterministic authoring
 
-### Work
+Reuse only approved deterministic authoring behaviour while the external agent continues to plan: identify the minimum authoring inputs and outputs, separate planning and model-specific control from reusable deterministic behaviour, decide whether approved behaviour is ported or invoked through a supervised local process, define author/validate/save journeys without exposing internal vocabulary, verify output through multiple external agents, and synchronize the authored result into the approved Drizz surface. This is delivered after the team is using the released product.
 
-- Product-review every operation name, description, input, output, limit, risk, and destructive effect.
-- Define one transport-neutral capability catalog.
-- Map approved capabilities to MCP tools.
-- Map the same capabilities to CLI commands.
-- Build the Claude plugin with MCP configuration and supported lifecycle hooks.
-- Build the Codex plugin with MCP configuration and supported lifecycle hooks.
-- Implement separate typed Go host adapters for Claude and Codex.
-- Resolve and verify the installed Drizz executable and merge host configuration without overwriting unrelated user settings.
-- Add the native review, trust, consent, disablement, and removal journeys.
-- Publish a tested capability matrix per agent product surface and version.
-- Capture only provider-exposed reasoning representations and preserve their source; never claim private chain-of-thought.
-- Provide stable machine-readable CLI output and exit behavior.
-- Define confirmation and explicit enablement for destructive operations.
-- Add client configuration helpers that never overwrite user configuration without consent.
-- Validate install, configure, authenticate, invoke, cancel, restart, upgrade, disable, and uninstall with Claude.
-- Repeat the supported journey with Codex and a generic MCP client, including honest partial capture where a surface exposes only MCP activity.
-- Verify that client-specific behavior does not enter the application core.
-- Do not add OpenInference, a Python sidecar, `coding-harness-tracing`, Neatlogs, or an external observability account to this journey.
+## 13. Open planning inputs
 
-### Delivery slices
-
-1. Implement the integration manager for detection, exact-path configuration, consent, native trust, verification, update, disablement, and removal.
-2. Implement and verify the Claude plugin and typed host adapter against the supported CLI and IDE versions.
-3. Implement and verify the Codex plugin and typed host adapter against the supported CLI and desktop versions.
-4. Complete the generic MCP client journey with explicitly partial agent context.
-5. Run the supported operating-system and client matrix, publish the capture capability matrix, and qualify the first agent-integrated release.
-
-### Exit
-
-Every approved first-release operation has equivalent authorization, execution, recording, cancellation, and failure behavior through MCP and CLI. A non-technical user can connect Claude or Codex through the supported installation journey, approve the integration, use Drizz without manually starting a process, and remove the integration cleanly.
-
-## 10. Stage 7: Deterministic authoring
-
-### Goal
-
-Reuse only approved deterministic authoring behavior while the external agent continues to plan.
-
-### Work
-
-- Identify the minimum authoring inputs and outputs.
-- Separate planning, hidden reasoning, and model-specific control from reusable deterministic behavior.
-- Review source distribution, intellectual property, assets, dependencies, and packaging.
-- Decide whether approved behavior is ported, invoked through a supervised local process, or replaced through a smaller contract.
-- Define author, validate, and save journeys without exposing internal implementation vocabulary.
-- Define session memory, recovery, loop protection, and cleanup only where deterministic product behavior requires them.
-- Verify output through multiple external agents.
-- Synchronize the authored result into the approved Drizz surface.
-
-### Exit
-
-Approved authoring works locally without Drizz owning planning and without shipping unapproved proprietary implementation.
-
-## 11. Stage 8: iOS support
-
-### Goal
-
-Extend the proven device, execution, synchronization, and authoring journey to the supported iOS simulator and device matrix.
-
-### Work
-
-- Map shared and iOS-specific Device Bridge behavior.
-- Implement supported observations and actions through the existing device contract.
-- Preserve platform-specific capabilities and failures where normalization would hide useful behavior.
-- Run the approved journey on the supported simulator and physical-device matrix.
-- Verify that MCP, CLI, execution, synchronization, and authoring behavior do not fork by interface.
-
-### Exit
-
-The approved iOS journey passes through the same product path and meets the same security, reliability, and evidence requirements as Android.
-
-## 12. Stage 9: Desktop and release
-
-### Goal
-
-Deliver one supported Drizz implementation through standalone and desktop journeys.
-
-### Work
-
-- Approve how the desktop locates, starts, stops, updates, and verifies Drizz.
-- Package the local MCP integration for each approved desktop agent surface. A Claude Desktop Extension is MCP-only unless that product exposes a separately approved lifecycle interface.
-- Prevent desktop and standalone processes from corrupting shared state.
-- Define version compatibility between desktop and Drizz.
-- Build signed artifacts for the supported platform matrix.
-- Add notarization where required.
-- Publish approved package-manager channels.
-- Define update, rollback, downgrade, and data-compatibility behavior.
-- Verify install, upgrade, downgrade, uninstall, and retained-user-data policy.
-- Complete privacy-safe diagnostics and support guidance.
-- Run the full first-release journey on every supported client and platform.
-
-### Exit
-
-A user installs Drizz through an approved channel, connects a supported client, authenticates, completes the first journey, sees synchronized history, upgrades, and uninstalls without credential leakage or data corruption.
-
-## 13. Stage 10: Additional capabilities
-
-Test plans, debugging, application management, reports, and other product areas are added as separate vertical outcomes.
-
-Each capability must:
-
-- use the same authentication and application boundaries;
-- enforce organization and resource authorization in Drizz services;
-- reuse execution, artifact, synchronization, and cleanup behavior where its semantics match;
-- define its own approved product contract;
-- avoid exposing another module's storage or internal provider vocabulary;
-- work through every interface that its product requirement names.
-
-OpenInference or another standard trace input is added only when an approved custom agent or model SDK journey requires it. It is not a prerequisite for Claude, Codex, Gemini, or another external agent application and has no current delivery stage.
-
-## 14. Open planning inputs
-
-Dates, staffing, parallel delivery, and estimates remain open until:
-
-- the responsible team is known;
-- the first journey is approved;
-- the remaining device, desktop, and provider audits are complete;
-- supported platforms are chosen;
-- proof results expose the real integration cost.
-
-Any schedule created before those inputs is a guess and must be labeled as one.
+Dates, staffing, parallel delivery, and estimates remain open until the responsible team is known, the first release journey is qualified on the supported matrix, and proof results expose the real integration and packaging cost. Any schedule created before those inputs is a guess and must be labelled as one.

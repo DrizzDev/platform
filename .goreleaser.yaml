@@ -1,0 +1,54 @@
+# Build the platform binary for every target with the compiled device helper carried inside it, then package archives,
+# checksums, a Homebrew formula, and a GitHub release. The carrier embeds one fixed asset path, so builds MUST run
+# sequentially — invoke with `goreleaser release --parallelism 1` (the Makefile release target does). Each target's
+# pre-hook injects that target's helper; the post-hook restores the committed placeholder before the next.
+version: 2
+
+project_name: drizz
+
+builds:
+  - id: drizz
+    builder: go
+    main: ./command/drizz
+    binary: drizz
+    env: [CGO_ENABLED=0]
+    flags: [-trimpath]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    hooks:
+      pre:
+        - cmd: scripts/embed {{ .Os }} {{ .Arch }} {{ envOrDefault "DRIZZ_HELPER_DIST" "../device-bridge/dist/helper" }}
+      post:
+        - cmd: scripts/placeholder
+
+archives:
+  - id: drizz
+    ids: [drizz]
+    name_template: "drizz-{{ .Os }}-{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: checksums.txt
+
+# A Homebrew cask installs the pre-built binary on macOS and strips the quarantine attribute, so the unsigned binary
+# runs without a Gatekeeper prompt. Linux and Windows install through the archives or the shell installer.
+homebrew_casks:
+  - name: drizz
+    ids: [drizz]
+    binaries: [drizz]
+    repository:
+      owner: DrizzDev
+      name: homebrew-tap
+    homepage: "https://drizz.dev"
+    description: "Drive connected devices from AI coding assistants and the command line, recorded locally."
+
+release:
+  github:
+    owner: DrizzDev
+    name: platform
+
+changelog:
+  disable: true
