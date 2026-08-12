@@ -22,6 +22,8 @@ func (command Command) root(scope context.Context) *cobra.Command {
 	root.AddCommand(command.mcp(scope))
 	root.AddCommand(command.login(scope))
 	root.AddCommand(command.logout(scope))
+	root.AddCommand(command.connect(scope))
+	root.AddCommand(command.hook(scope))
 	command.capabilities(scope, root)
 
 	return root

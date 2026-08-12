@@ -30,6 +30,7 @@ var frameworks = []confinement{
 	{framework: "golang.org/x/oauth2", owner: "/internal/identity/infrastructure/auth0"},
 	{framework: "github.com/hashicorp/go-retryablehttp", owner: "/internal/platform/transport"},
 	{framework: "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp", owner: "/internal/platform/transport"},
+	{framework: "github.com/pelletier/go-toml", owner: "/internal/integration/infrastructure/wiring"},
 }
 
 func TestFramework(test *testing.T) {

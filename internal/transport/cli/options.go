@@ -8,6 +8,8 @@ type Options struct {
 	Device    Session
 	Logout    Departure
 	Perform   Perform
+	Connect   Connector
+	Receiver  Receiver
 	Arguments []string
 	Streams   Streams
 	Release   release.Identity
