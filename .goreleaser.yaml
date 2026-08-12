@@ -33,8 +33,9 @@ archives:
 checksum:
   name_template: checksums.txt
 
-# A Homebrew cask installs the pre-built binary on macOS and strips the quarantine attribute, so the unsigned binary
-# runs without a Gatekeeper prompt. Linux and Windows install through the archives or the shell installer.
+# A Homebrew cask installs the pre-built binary on macOS. The post-install hook strips the quarantine attribute so the
+# unsigned binary runs without a Gatekeeper prompt; this is removed once the binary is notarized. Linux and Windows
+# install through the archives or the shell installer.
 homebrew_casks:
   - name: drizz
     ids: [drizz]
@@ -44,6 +45,10 @@ homebrew_casks:
       name: homebrew-tap
     homepage: "https://drizz.dev"
     description: "Drive connected devices from AI coding assistants and the command line, recorded locally."
+    hooks:
+      post:
+        install: |
+          system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/drizz"]
 
 # The binaries are published to a public releases repo so end users can download them while the source stays private.
 release:

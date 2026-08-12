@@ -33,6 +33,14 @@ Ask your assistant:
 
 > Use the Drizz tools to list my connected devices and take a screenshot of the first one.
 
+## If macOS blocks it
+
+Internal builds aren't notarized yet, so macOS may warn that it "could not verify" Drizz. If that happens, allow it once:
+
+```sh
+xattr -dr com.apple.quarantine "$(brew --prefix)/bin/drizz"
+```
+
 ## Remove it later
 
 ```sh
