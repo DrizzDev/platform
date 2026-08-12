@@ -32,6 +32,7 @@ var kinds = map[string]error{
 	"SecureScreenCaptureError":    control.Protected{},
 	"DeviceOperationTimeoutError": control.Timeout{},
 	"IncompatibleDeviceError":     control.Incompatible{},
+	"UnsupportedOperationError":   control.Incompatible{},
 	"DeviceCommandError":          control.Failed{},
 }
 

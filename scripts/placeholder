@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Restore the committed development placeholder for the carried device helper. The release build overwrites the asset
+# with a compiled helper per target; this puts the placeholder back so the working tree is clean and a default build
+# reports no helper embedded. It is the single source of the placeholder bytes.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+asset="$root/internal/device/infrastructure/carrier/asset"
+mkdir -p "$asset"
+printf 'drizz-device-helper-placeholder\nThis file is replaced with the compiled device helper at release build time.\n' > "$asset/bridge"
+shasum -a 256 "$asset/bridge" | awk '{print $1}' > "$asset/bridge.sha256"

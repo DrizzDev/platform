@@ -1,10 +1,18 @@
-.PHONY: build crossbuild hygiene format fix module vet staticcheck lint architecture test race vulnerability license secret smoke hook prepush verify
+.PHONY: build crossbuild release hygiene format fix module vet staticcheck lint architecture test race vulnerability license secret smoke hook prepush verify
 
 build:
 	go build -trimpath ./...
 
 crossbuild:
 	scripts/crossbuild
+
+# release packages the archives, checksums, Homebrew cask, and GitHub release. It requires the compiled device helpers
+# (device-bridge: npm run compile), a git tag, and a GitHub token. The token is read from GITHUB_TOKEN, falling back to
+# DRIZZ_GITHUB_PAT_TOKEN loaded from a gitignored .env. Sequential (-p 1) because each target injects its own helper
+# into the one embedded asset path.
+release:
+	@set -a; [ -f .env ] && . ./.env; set +a; \
+	GITHUB_TOKEN="$${GITHUB_TOKEN:-$${DRIZZ_GITHUB_PAT_TOKEN:-}}" goreleaser release --clean --parallelism 1
 
 hygiene:
 	pre-commit run --all-files --show-diff-on-failure

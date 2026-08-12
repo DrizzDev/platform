@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Build the installable platform binary for every target with the compiled device helper carried inside it, then
+# checksum them. Builds are sequential because the carrier embeds one fixed asset path, so each target's helper is
+# injected, built, and the placeholder restored before the next. goreleaser packages these prebuilt binaries.
+#
+# Usage: scripts/release [helper-dist] [outdir]
+#   helper-dist  device-helper compile output root (device-bridge: npm run compile). Default ../device-bridge/dist/helper
+#   outdir       where the binaries and SHA256SUMS are written. Default dist/release
+#
+# A target whose compiled helper is missing is skipped with a warning, so a partial helper set still produces the
+# binaries it can.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+helpers="${1:-$root/../device-bridge/dist/helper}"
+out="${2:-$root/dist/release}"
+asset="$root/internal/device/infrastructure/carrier/asset"
+
+backup="$(mktemp -d)"
+cp "$asset/bridge" "$asset/bridge.sha256" "$backup/"
+restore() { cp "$backup/bridge" "$backup/bridge.sha256" "$asset/"; rm -rf "$backup"; }
+trap restore EXIT
+
+mkdir -p "$out"
+: > "$out/SHA256SUMS"
+
+for pair in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do
+  goos="${pair%/*}"; goarch="${pair#*/}"
+  name="bridge"; ext=""
+  [ "$goos" = "windows" ] && { name="bridge.exe"; ext=".exe"; }
+  if [ ! -f "$helpers/${goos}_${goarch}/$name" ]; then
+    echo "release: skip $goos/$goarch (no compiled helper)"
+    continue
+  fi
+  echo "release: $goos/$goarch"
+  "$root/scripts/embed" "$goos" "$goarch" "$helpers"
+  CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build -trimpath -o "$out/drizz-$goos-$goarch$ext" "$root/command/drizz"
+  ( cd "$out" && shasum -a 256 "drizz-$goos-$goarch$ext" >> "SHA256SUMS" )
+done
+
+echo "release: binaries -> $out"

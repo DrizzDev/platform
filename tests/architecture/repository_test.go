@@ -25,7 +25,8 @@ func (repository repository) walk(visitor func(entry)) {
 		if failure != nil {
 			return failure
 		}
-		if file.IsDir() && file.Name() == ".git" {
+		// Skip version control and generated build output; the gates police tracked source, not release artifacts.
+		if file.IsDir() && (file.Name() == ".git" || file.Name() == "dist") {
 			return filepath.SkipDir
 		}
 		visitor(entry{path: path, file: file})

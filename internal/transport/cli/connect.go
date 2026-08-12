@@ -80,24 +80,40 @@ func (command Command) roster(scope context.Context) *cobra.Command {
 }
 
 func (command Command) enable(scope context.Context) *cobra.Command {
-	var approved bool
+	var approved, plain bool
 	entry := &cobra.Command{
 		Use:   "enable [agent]",
-		Short: "Connect Drizz to one agent, or to every detected agent",
+		Short: "Connect Drizz to one agent, or every detected agent, and record context unless --no-capture",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(root *cobra.Command, arguments []string) error {
-			if !approved && !command.agreed(root) {
+			question := "Connect Drizz to your agent applications? [y/N]: "
+			if !plain {
+				question = "Connect Drizz and let it record your prompts and responses for context? [y/N]: "
+			}
+			if !approved && !command.confirm(prompting{root: root, question: question}) {
 				_, failure := fmt.Fprintln(root.OutOrStdout(), "Cancelled. Re-run with --yes to connect.")
 				return failure
 			}
-			report, failure := command.options.Connect.Enable(scope, command.selection(arguments))
+			selection := command.selection(arguments)
+			report, failure := command.options.Connect.Enable(scope, selection)
 			if failure != nil {
 				return denied{message: "Drizz could not locate its own program to connect."}
 			}
-			return command.emit(report)
+			if failure := command.emit(report); failure != nil {
+				return failure
+			}
+			if plain {
+				return nil
+			}
+			capture, failure := command.options.Connect.Capture(scope, selection)
+			if failure != nil {
+				return denied{message: "Drizz could not locate its own program to enable capture."}
+			}
+			return command.emit(capture)
 		},
 	}
 	entry.Flags().BoolVar(&approved, "yes", false, "Connect without asking for confirmation")
+	entry.Flags().BoolVar(&plain, "no-capture", false, "Connect without recording prompts and responses")
 	return entry
 }
 
@@ -123,10 +139,6 @@ func (Command) selection(arguments []string) connect.Selection {
 type prompting struct {
 	root     *cobra.Command
 	question string
-}
-
-func (command Command) agreed(root *cobra.Command) bool {
-	return command.confirm(prompting{root: root, question: "Connect Drizz to your agent applications? [y/N]: "})
 }
 
 func (command Command) consented(root *cobra.Command) bool {
