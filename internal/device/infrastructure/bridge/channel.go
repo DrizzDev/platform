@@ -6,6 +6,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Channel is a supervised, long-lived stdio JSON-RPC conversation with the sidecar; the live session is an atomic
@@ -15,6 +18,9 @@ type Channel struct {
 
 	slots chan struct{}
 	done  chan struct{}
+
+	tracer   trace.Tracer
+	duration metric.Float64Histogram
 
 	stalls atomic.Int64
 	live   atomic.Pointer[session]
@@ -27,7 +33,10 @@ type Channel struct {
 	options Options
 }
 
-func (channel *Channel) Invoke(scope context.Context, request Request) (Response, error) {
+func (channel *Channel) Invoke(scope context.Context, request Request) (response Response, failure error) {
+	scope, gauge := channel.begin(scope, request.Method)
+	defer func() { gauge.close(scope, failure) }()
+
 	if channel.options.Timeout > 0 {
 		var cancel context.CancelFunc
 		scope, cancel = context.WithTimeout(scope, channel.options.Timeout)
@@ -45,7 +54,7 @@ func (channel *Channel) Invoke(scope context.Context, request Request) (Response
 	if failure != nil {
 		return Response{}, failure
 	}
-	response, failure := live.exchange(scope, request)
+	response, failure = live.exchange(scope, request)
 	channel.observe(failure)
 	return response, failure
 }

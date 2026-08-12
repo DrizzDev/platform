@@ -12,7 +12,10 @@ import (
 )
 
 // Install installs an application package on the target device and records the action.
-func (operator Operator) Install(scope context.Context, target Package) (Ack, error) {
+func (operator Operator) Install(scope context.Context, target Package) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Install)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Ack{}, failure
@@ -52,7 +55,10 @@ type order struct {
 	app        string
 }
 
-func (operator Operator) address(scope context.Context, spec order) (Ack, error) {
+func (operator Operator) address(scope context.Context, spec order) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, spec.capability)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, spec.serial)
 	if failure != nil {
 		return Ack{}, failure
@@ -69,7 +75,10 @@ func (operator Operator) address(scope context.Context, spec order) (Ack, error)
 }
 
 // Installed lists the applications installed on the target device and records the read.
-func (operator Operator) Installed(scope context.Context, target Target) (Listing, error) {
+func (operator Operator) Installed(scope context.Context, target Target) (listing Listing, failure error) {
+	scope, watch := operator.begin(scope, catalog.Installed)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Listing{}, failure
@@ -83,7 +92,10 @@ func (operator Operator) Installed(scope context.Context, target Target) (Listin
 }
 
 // Running lists the applications currently running on the target device and records the read.
-func (operator Operator) Running(scope context.Context, target Target) (Listing, error) {
+func (operator Operator) Running(scope context.Context, target Target) (listing Listing, failure error) {
+	scope, watch := operator.begin(scope, catalog.Running)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Listing{}, failure
@@ -97,7 +109,10 @@ func (operator Operator) Running(scope context.Context, target Target) (Listing,
 }
 
 // Foreground reads the application in the foreground on the target device and records the read.
-func (operator Operator) Foreground(scope context.Context, target Target) (Report, error) {
+func (operator Operator) Foreground(scope context.Context, target Target) (report Report, failure error) {
+	scope, watch := operator.begin(scope, catalog.Foreground)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Report{}, failure
@@ -111,7 +126,10 @@ func (operator Operator) Foreground(scope context.Context, target Target) (Repor
 }
 
 // Url reads the current link open in the active application on the target device and records the read.
-func (operator Operator) Url(scope context.Context, target Target) (Report, error) {
+func (operator Operator) Url(scope context.Context, target Target) (report Report, failure error) {
+	scope, watch := operator.begin(scope, catalog.Url)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Report{}, failure
@@ -125,7 +143,10 @@ func (operator Operator) Url(scope context.Context, target Target) (Report, erro
 }
 
 // Disk reads the free disk space on the target device and records the read.
-func (operator Operator) Disk(scope context.Context, target Target) (Measure, error) {
+func (operator Operator) Disk(scope context.Context, target Target) (space Measure, failure error) {
+	scope, watch := operator.begin(scope, catalog.Disk)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Measure{}, failure

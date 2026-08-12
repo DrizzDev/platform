@@ -11,7 +11,10 @@ import (
 )
 
 // Snapshot captures the screen of the target device together with its on-screen element tree, and records the capture.
-func (operator Operator) Snapshot(scope context.Context, target Target) (Snapshot, error) {
+func (operator Operator) Snapshot(scope context.Context, target Target) (shot Snapshot, failure error) {
+	scope, watch := operator.begin(scope, catalog.Snapshot)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Snapshot{}, failure
@@ -26,7 +29,10 @@ func (operator Operator) Snapshot(scope context.Context, target Target) (Snapsho
 }
 
 // Hierarchy reads the on-screen element tree of the target device and records it.
-func (operator Operator) Hierarchy(scope context.Context, target Target) (Tree, error) {
+func (operator Operator) Hierarchy(scope context.Context, target Target) (tree Tree, failure error) {
+	scope, watch := operator.begin(scope, catalog.Hierarchy)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Tree{}, failure
@@ -38,8 +44,8 @@ func (operator Operator) Hierarchy(scope context.Context, target Target) (Tree, 
 	operator.inscribe(scope, entry{
 		capability: catalog.Hierarchy,
 		note: recording.Note{
-			Origin:   origin.Capability,
 			Fidelity: fidelity.Exact,
+			Origin:   origin.Capability,
 			Category: category.Hierarchy,
 			Payload:  []byte("hierarchy"),
 			Artifact: []byte(reading.Text()),
@@ -49,7 +55,10 @@ func (operator Operator) Hierarchy(scope context.Context, target Target) (Tree, 
 }
 
 // Dimensions reads the screen size of the target device and records the read.
-func (operator Operator) Dimensions(scope context.Context, target Target) (Extent, error) {
+func (operator Operator) Dimensions(scope context.Context, target Target) (size Extent, failure error) {
+	scope, watch := operator.begin(scope, catalog.Dimensions)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Extent{}, failure

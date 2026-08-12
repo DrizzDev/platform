@@ -16,6 +16,7 @@ import (
 
 	"github.com/DrizzDev/platform/internal/capability/application/operator"
 	"github.com/DrizzDev/platform/internal/capability/domain/outcome"
+	"github.com/DrizzDev/platform/internal/capability/infrastructure/telemetry"
 	"github.com/DrizzDev/platform/internal/capture/application/recording"
 	"github.com/DrizzDev/platform/internal/capture/domain/category"
 	"github.com/DrizzDev/platform/internal/capture/infrastructure/artifact"
@@ -43,7 +44,15 @@ import (
 // device control flow without a physical device.
 type bridge struct {
 	frame   capture.Capture
+	tree    string
 	devices []device.Device
+}
+
+func (bridge bridge) hierarchy() string {
+	if bridge.tree == "" {
+		return "<hierarchy/>"
+	}
+	return bridge.tree
 }
 
 func (bridge bridge) Screenshot(context.Context, device.Device) (capture.Capture, error) {
@@ -51,11 +60,11 @@ func (bridge bridge) Screenshot(context.Context, device.Device) (capture.Capture
 }
 
 func (bridge bridge) Snapshot(context.Context, device.Device) (capture.Capture, string, error) {
-	return bridge.frame, "<hierarchy/>", nil
+	return bridge.frame, bridge.hierarchy(), nil
 }
 
 func (bridge bridge) Hierarchy(context.Context, device.Device) (string, error) {
-	return "<hierarchy/>", nil
+	return bridge.hierarchy(), nil
 }
 
 func (bridge bridge) Dimensions(context.Context, device.Device) (int, int, error) {
@@ -126,6 +135,7 @@ func (clock) Now() time.Time { return time.Unix(1_000_000, 0) }
 
 type kit struct {
 	test *testing.T
+	sink *bytes.Buffer
 }
 
 func (kit kit) device(id string) device.Device {
@@ -157,7 +167,11 @@ func (kit kit) capture(data string) capture.Capture {
 func (kit kit) build(desk bridge) (operator.Operator, sqlite.Store, artifact.Store) {
 	kit.test.Helper()
 	dir := kit.test.TempDir()
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	destination := io.Discard
+	if kit.sink != nil {
+		destination = kit.sink
+	}
+	logger := slog.New(slog.NewJSONHandler(destination, nil))
 	tracer := tracenoop.NewTracerProvider().Tracer("test")
 	meter := metricnoop.NewMeterProvider().Meter("test")
 
@@ -182,7 +196,13 @@ func (kit kit) build(desk bridge) (operator.Operator, sqlite.Store, artifact.Sto
 	if failure != nil {
 		kit.test.Fatal(failure)
 	}
-	performed, failure := operator.New(operator.Options{Flow: flow, Recorder: recorder, Logger: logger})
+	monitor, failure := telemetry.New(telemetry.Options{Tracer: tracer, Meter: meter})
+	if failure != nil {
+		kit.test.Fatal(failure)
+	}
+	performed, failure := operator.New(operator.Options{
+		Flow: flow, Recorder: recorder, Logger: logger, Monitor: monitor,
+	})
 	if failure != nil {
 		kit.test.Fatal(failure)
 	}
@@ -271,8 +291,18 @@ func TestRecordDropObservable(test *testing.T) {
 	if failure != nil {
 		test.Fatal(failure)
 	}
+	monitor, failure := telemetry.New(telemetry.Options{
+		Tracer: tracenoop.NewTracerProvider().Tracer("test"),
+		Meter:  metricnoop.NewMeterProvider().Meter("test"),
+	})
+	if failure != nil {
+		test.Fatal(failure)
+	}
 	performed, failure := operator.New(operator.Options{
-		Flow: flow, Recorder: broken{}, Logger: slog.New(slog.NewJSONHandler(&log, nil)),
+		Flow:     flow,
+		Recorder: broken{},
+		Logger:   slog.New(slog.NewJSONHandler(&log, nil)),
+		Monitor:  monitor,
 	})
 	if failure != nil {
 		test.Fatal(failure)
@@ -302,5 +332,50 @@ func TestDevices(test *testing.T) {
 	}
 	if len(roster.Serials) != 2 {
 		test.Fatalf("roster = %v, want two serials", roster.Serials)
+	}
+}
+
+// TestTelemetryOmitsDeviceContent is the privacy canary: it drives the capabilities that carry the most sensitive
+// device content — a screenshot, the on-screen element tree, and typed text — through the instrumented operator, then
+// proves none of that content ever reaches the telemetry log. The instrumentation may only record the capability name,
+// the outcome code, and the duration; a screenshot's bytes, the element tree, or a typed secret leaking into a log,
+// metric, or span attribute is a privacy defect.
+func TestTelemetryOmitsDeviceContent(test *testing.T) {
+	test.Parallel()
+
+	const (
+		screen = "canary-screen-bytes"
+		tree   = "canary-element-tree"
+		secret = "canary-typed-secret"
+	)
+
+	kit := kit{test: test, sink: &bytes.Buffer{}}
+	desk := bridge{frame: kit.capture(screen), devices: []device.Device{kit.device("s-1")}}
+	performed, _, _ := kit.build(desk)
+	scope := context.Background()
+
+	if _, failure := performed.Screenshot(scope, operator.Target{Serial: "s-1"}); failure != nil {
+		test.Fatal(failure)
+	}
+	if _, failure := performed.Snapshot(scope, operator.Target{Serial: "s-1"}); failure != nil {
+		test.Fatal(failure)
+	}
+	if _, failure := performed.Hierarchy(scope, operator.Target{Serial: "s-1"}); failure != nil {
+		test.Fatal(failure)
+	}
+	if _, failure := performed.Type(scope, operator.Entry{Serial: "s-1", Text: secret}); failure != nil {
+		test.Fatal(failure)
+	}
+
+	if !strings.Contains(kit.sink.String(), "capability.completed") {
+		test.Fatal("the instrumentation must emit a boundary log for each capability")
+	}
+	for _, forbidden := range []string{screen, secret} {
+		if strings.Contains(kit.sink.String(), forbidden) {
+			test.Fatalf("device content %q leaked into telemetry", forbidden)
+		}
+	}
+	if strings.Contains(kit.sink.String(), tree) {
+		test.Fatal("the on-screen element tree leaked into telemetry")
 	}
 }

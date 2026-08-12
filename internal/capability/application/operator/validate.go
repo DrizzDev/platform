@@ -10,6 +10,8 @@ func (options Options) validate() error {
 		return errors.New("operator recorder is required")
 	case options.Logger == nil:
 		return errors.New("operator logger is required")
+	case options.Monitor == nil:
+		return errors.New("operator monitor is required")
 	default:
 		return nil
 	}

@@ -17,7 +17,10 @@ import (
 
 // Screenshot captures the screen of the target device and records the capture. It resolves the serial to a connected
 // device first, so a missing or unauthorized device is reported as a stable code rather than a raw failure.
-func (operator Operator) Screenshot(scope context.Context, target Target) (Shot, error) {
+func (operator Operator) Screenshot(scope context.Context, target Target) (shot Shot, failure error) {
+	scope, watch := operator.begin(scope, catalog.Screenshot)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Shot{}, failure

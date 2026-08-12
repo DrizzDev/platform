@@ -7,9 +7,12 @@ import (
 
 	"github.com/DrizzDev/platform/internal/capability/application/operator"
 	"github.com/DrizzDev/platform/internal/capability/domain/outcome"
+	"github.com/DrizzDev/platform/internal/capability/infrastructure/telemetry"
+	"github.com/DrizzDev/platform/internal/capture/application/recording"
 	"github.com/DrizzDev/platform/internal/device/application/control"
 	"github.com/DrizzDev/platform/internal/device/infrastructure/bridge"
 	"github.com/DrizzDev/platform/internal/device/infrastructure/sidecar"
+	"github.com/DrizzDev/platform/internal/platform/observability"
 	"github.com/DrizzDev/platform/internal/transport/cli"
 	"github.com/DrizzDev/platform/internal/transport/mcp"
 )
@@ -302,23 +305,50 @@ func (foundation foundation) assemble(scope context.Context) (operator.Operator,
 	}
 	closers = append(closers, func() { _ = store.Close() })
 
-	driver, failure := bridge.New(bridge.Options{Location: handle.Location, Digest: handle.Digest, Timeout: dispatch})
+	driver, failure := bridge.New(bridge.Options{
+		Location: handle.Location,
+		Digest:   handle.Digest,
+		Timeout:  dispatch,
+		Tracer:   observer.Tracer(),
+		Meter:    observer.Meter(),
+	})
 	if failure != nil {
 		release()
 		return operator.Operator{}, idle, failure
 	}
 	closers = append(closers, func() { _ = driver.Close() })
 
-	flow, failure := control.New(control.Options{Bridge: driver})
-	if failure != nil {
-		release()
-		return operator.Operator{}, idle, failure
-	}
-
-	engine, failure := operator.New(operator.Options{Flow: flow, Recorder: recorder, Logger: observer.Diagnostics()})
+	engine, failure := foundation.equip(equipment{observer: observer, driver: driver, recorder: recorder})
 	if failure != nil {
 		release()
 		return operator.Operator{}, idle, failure
 	}
 	return engine, release, nil
+}
+
+// equipment carries the assembled parts an operator is built from, so they pass through one typed input rather than a
+// wide parameter list.
+type equipment struct {
+	observer observability.Provider
+	driver   *bridge.Driver
+	recorder recording.Recorder
+}
+
+// equip wires the device flow, the telemetry monitor, and the recorder into one operator; both surfaces share it, so
+// they produce the same authoritative record and the same telemetry from the same code.
+func (foundation foundation) equip(gear equipment) (operator.Operator, error) {
+	flow, failure := control.New(control.Options{Bridge: gear.driver})
+	if failure != nil {
+		return operator.Operator{}, failure
+	}
+	monitor, failure := telemetry.New(telemetry.Options{Tracer: gear.observer.Tracer(), Meter: gear.observer.Meter()})
+	if failure != nil {
+		return operator.Operator{}, failure
+	}
+	return operator.New(operator.Options{
+		Flow:     flow,
+		Recorder: gear.recorder,
+		Logger:   gear.observer.Diagnostics(),
+		Monitor:  monitor,
+	})
 }

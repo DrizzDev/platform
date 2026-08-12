@@ -10,7 +10,10 @@ import (
 )
 
 // Images lists the emulator images available to run and records the read.
-func (operator Operator) Images(scope context.Context) (Images, error) {
+func (operator Operator) Images(scope context.Context) (images Images, failure error) {
+	scope, watch := operator.begin(scope, catalog.Images)
+	defer func() { watch.finish(scope, failure) }()
+
 	catalogue := operator.flow.Images(scope, platform.Android)
 	if reason, failed := catalogue.Failure(); failed {
 		return Images{}, operator.refuse(reason)
@@ -20,7 +23,10 @@ func (operator Operator) Images(scope context.Context) (Images, error) {
 }
 
 // Boot starts an emulator from an image and records the action.
-func (operator Operator) Boot(scope context.Context, target Image) (Ack, error) {
+func (operator Operator) Boot(scope context.Context, target Image) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Boot)
+	defer func() { watch.finish(scope, failure) }()
+
 	image, failure := emulator.New(emulator.Input{Platform: platform.Android, Name: target.Name})
 	if failure != nil {
 		return Ack{}, Refusal{Code: outcome.Invalid}
@@ -33,7 +39,10 @@ func (operator Operator) Boot(scope context.Context, target Image) (Ack, error) 
 }
 
 // Pause pauses a running emulator and records the action.
-func (operator Operator) Pause(scope context.Context, target Target) (Ack, error) {
+func (operator Operator) Pause(scope context.Context, target Target) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Pause)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Ack{}, failure
@@ -46,7 +55,10 @@ func (operator Operator) Pause(scope context.Context, target Target) (Ack, error
 }
 
 // Resume resumes a paused emulator and records the action.
-func (operator Operator) Resume(scope context.Context, target Target) (Ack, error) {
+func (operator Operator) Resume(scope context.Context, target Target) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Resume)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Ack{}, failure

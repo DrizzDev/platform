@@ -16,7 +16,10 @@ import (
 )
 
 // Swipe drags across the target device from one point to another and records the action.
-func (operator Operator) Swipe(scope context.Context, drag Drag) (Ack, error) {
+func (operator Operator) Swipe(scope context.Context, drag Drag) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Swipe)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, drag.Serial)
 	if failure != nil {
 		return Ack{}, failure
@@ -44,7 +47,10 @@ func (operator Operator) Swipe(scope context.Context, drag Drag) (Ack, error) {
 }
 
 // Pinch zooms around a centre point on the target device and records the action.
-func (operator Operator) Pinch(scope context.Context, squeeze Squeeze) (Ack, error) {
+func (operator Operator) Pinch(scope context.Context, squeeze Squeeze) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Pinch)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, squeeze.Serial)
 	if failure != nil {
 		return Ack{}, failure
@@ -68,7 +74,10 @@ func (operator Operator) Pinch(scope context.Context, squeeze Squeeze) (Ack, err
 }
 
 // Press presses a hardware or remote button on the target device and records the action.
-func (operator Operator) Press(scope context.Context, key Key) (Ack, error) {
+func (operator Operator) Press(scope context.Context, key Key) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Press)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, key.Serial)
 	if failure != nil {
 		return Ack{}, failure
@@ -85,7 +94,10 @@ func (operator Operator) Press(scope context.Context, key Key) (Ack, error) {
 }
 
 // Type types text into the focused field on the target device and records the length typed, never the text itself.
-func (operator Operator) Type(scope context.Context, input Entry) (Ack, error) {
+func (operator Operator) Type(scope context.Context, input Entry) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Type)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, input.Serial)
 	if failure != nil {
 		return Ack{}, failure
@@ -105,7 +117,10 @@ func (operator Operator) Type(scope context.Context, input Entry) (Ack, error) {
 }
 
 // Clear clears the focused text field on the target device and records the action.
-func (operator Operator) Clear(scope context.Context, target Target) (Ack, error) {
+func (operator Operator) Clear(scope context.Context, target Target) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Clear)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Ack{}, failure
@@ -118,7 +133,10 @@ func (operator Operator) Clear(scope context.Context, target Target) (Ack, error
 }
 
 // Back presses the back button on the target device and records the action.
-func (operator Operator) Back(scope context.Context, target Target) (Ack, error) {
+func (operator Operator) Back(scope context.Context, target Target) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Back)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Ack{}, failure
@@ -131,7 +149,10 @@ func (operator Operator) Back(scope context.Context, target Target) (Ack, error)
 }
 
 // Home presses the home button on the target device and records the action.
-func (operator Operator) Home(scope context.Context, target Target) (Ack, error) {
+func (operator Operator) Home(scope context.Context, target Target) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Home)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, target.Serial)
 	if failure != nil {
 		return Ack{}, failure
@@ -144,7 +165,10 @@ func (operator Operator) Home(scope context.Context, target Target) (Ack, error)
 }
 
 // Locate sets the reported location of the target device and records the action.
-func (operator Operator) Locate(scope context.Context, fix Fix) (Ack, error) {
+func (operator Operator) Locate(scope context.Context, fix Fix) (ack Ack, failure error) {
+	scope, watch := operator.begin(scope, catalog.Locate)
+	defer func() { watch.finish(scope, failure) }()
+
 	subject, failure := operator.resolve(scope, fix.Serial)
 	if failure != nil {
 		return Ack{}, failure
