@@ -1,24 +1,34 @@
 package filesystem
 
-import "os"
+import (
+	"os"
+	"path/filepath"
+)
 
-// Scratch writes short-lived files for a person to open, such as a captured screenshot. It is the approved boundary
-// for this kind of local file output, so transports and application code do not touch the filesystem directly.
+const (
+	folder   = "drizz"
+	captures = "captures"
+)
+
 type Scratch struct{}
 
 func New() Scratch {
 	return Scratch{}
 }
 
-// File is content to write for a person to open: its bytes and the extension its temporary file should carry.
 type File struct {
 	Extension string
 	Content   []byte
 }
 
-// Save writes the file to a new temporary path and returns that path.
-func (Scratch) Save(file File) (string, error) {
-	handle, failure := os.CreateTemp("", "drizz-*."+file.Extension)
+// Save writes a captured file to Drizz's per-user cache directory and returns its path, giving an agent or a person a
+// stable, predictable location to work with rather than the opaque, auto-cleaned operating-system temporary directory.
+func (scratch Scratch) Save(file File) (string, error) {
+	directory, failure := scratch.directory()
+	if failure != nil {
+		return "", failure
+	}
+	handle, failure := os.CreateTemp(directory, "capture-*."+file.Extension)
 	if failure != nil {
 		return "", failure
 	}
@@ -28,4 +38,17 @@ func (Scratch) Save(file File) (string, error) {
 		return "", failure
 	}
 	return handle.Name(), closing
+}
+
+// directory is Drizz's per-user captures directory, created if missing.
+func (Scratch) directory() (string, error) {
+	cache, failure := os.UserCacheDir()
+	if failure != nil {
+		return "", failure
+	}
+	path := filepath.Join(cache, folder, captures)
+	if failure := os.MkdirAll(path, 0o700); failure != nil {
+		return "", failure
+	}
+	return path, nil
 }

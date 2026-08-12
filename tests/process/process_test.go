@@ -36,6 +36,12 @@ func TestMain(suite *testing.M) {
 		fmt.Fprintf(os.Stderr, "build: %v\n%s", failure, output)
 		os.Exit(1)
 	}
+	// These tests observe the server's own diagnostics (its readiness marker and per-request outcomes), so the suite
+	// runs the server with logging on; it is off by default.
+	if failure := os.Setenv("DRIZZ_LOG_LEVEL", "info"); failure != nil {
+		fmt.Fprintln(os.Stderr, failure)
+		os.Exit(1)
+	}
 	code := suite.Run()
 	_ = os.RemoveAll(directory)
 	os.Exit(code)

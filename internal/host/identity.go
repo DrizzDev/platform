@@ -2,7 +2,6 @@ package host
 
 import (
 	"context"
-	"io"
 	"time"
 
 	"github.com/DrizzDev/platform/internal/identity/application/login"
@@ -52,12 +51,10 @@ func (foundation foundation) provision(scope context.Context) (configuration.Set
 	if failure != nil {
 		return configuration.Settings{}, observability.Provider{}, failure
 	}
-	// Command-line runs keep the terminal clean: diagnostics are discarded here, while telemetry still exports and the
-	// long-lived MCP server (which the client captures) keeps its diagnostics on standard error.
 	observer, failure := observability.New(scope, observability.Options{
 		Build:    foundation.build,
 		Settings: settings,
-		Output:   io.Discard,
+		Output:   foundation.streams.Failure,
 	})
 	if failure != nil {
 		return configuration.Settings{}, observability.Provider{}, failure

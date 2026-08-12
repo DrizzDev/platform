@@ -52,7 +52,7 @@ var catalogue = []Entry{
 	{
 		name:    Screenshot,
 		title:   "TakeScreenshot",
-		summary: "Capture the current screen of a connected device.",
+		summary: "Capture the current screen of a connected device and save it to a file, returning the file path.",
 		parameters: []Parameter{
 			{name: "serial", summary: "The serial of the device to capture."},
 		},
@@ -146,7 +146,7 @@ var catalogue = []Entry{
 	{
 		name:    Snapshot,
 		title:   "TakeSnapshot",
-		summary: "Capture the screen of a connected device together with its on-screen element tree.",
+		summary: "Capture the screen of a connected device together with its on-screen element tree, saving the image to a file and returning its path.",
 		parameters: []Parameter{
 			{name: "serial", summary: "The serial of the device to capture."},
 		},
@@ -154,7 +154,7 @@ var catalogue = []Entry{
 	{
 		name:    Hierarchy,
 		title:   "GetUIHierarchy",
-		summary: "Read the on-screen element tree of a connected device.",
+		summary: "Read the on-screen element tree of a connected device and save it to a file, returning the file path.",
 		parameters: []Parameter{
 			{name: "serial", summary: "The serial of the device."},
 		},

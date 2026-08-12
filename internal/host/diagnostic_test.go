@@ -16,7 +16,8 @@ func TestTransport(test *testing.T) {
 
 	var diagnostics bytes.Buffer
 	process, failure := host.New(host.Options{
-		Arguments: []string{"mcp"},
+		Arguments:   []string{"mcp"},
+		Environment: []string{"DRIZZ_LOG_LEVEL=info"},
 		Streams: host.Streams{
 			Input:   faulty{},
 			Output:  io.Discard,
@@ -73,7 +74,8 @@ func TestCancellation(test *testing.T) {
 
 	var diagnostics bytes.Buffer
 	process, failure := host.New(host.Options{
-		Arguments: []string{"mcp"},
+		Arguments:   []string{"mcp"},
+		Environment: []string{"DRIZZ_LOG_LEVEL=info"},
 		Streams: host.Streams{
 			Input:   io.NopCloser(strings.NewReader("")),
 			Output:  io.Discard,
