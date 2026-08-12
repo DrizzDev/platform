@@ -43,11 +43,107 @@ func (performer performer) Screenshot(context.Context, operator.Target) (operato
 	return performer.shot, performer.fail
 }
 
+func (performer performer) Snapshot(context.Context, operator.Target) (operator.Snapshot, error) {
+	return operator.Snapshot{}, performer.fail
+}
+
+func (performer performer) Hierarchy(context.Context, operator.Target) (operator.Tree, error) {
+	return operator.Tree{}, performer.fail
+}
+
+func (performer performer) Dimensions(context.Context, operator.Target) (operator.Extent, error) {
+	return operator.Extent{}, performer.fail
+}
+
 func (performer performer) Devices(context.Context) (operator.Roster, error) {
 	return performer.roster, performer.fail
 }
 
+func (performer performer) Install(context.Context, operator.Package) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Launch(context.Context, operator.Application) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Terminate(context.Context, operator.Application) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Wipe(context.Context, operator.Application) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Installed(context.Context, operator.Target) (operator.Listing, error) {
+	return operator.Listing{}, performer.fail
+}
+
+func (performer performer) Running(context.Context, operator.Target) (operator.Listing, error) {
+	return operator.Listing{}, performer.fail
+}
+
+func (performer performer) Foreground(context.Context, operator.Target) (operator.Report, error) {
+	return operator.Report{}, performer.fail
+}
+
+func (performer performer) Url(context.Context, operator.Target) (operator.Report, error) {
+	return operator.Report{}, performer.fail
+}
+
+func (performer performer) Disk(context.Context, operator.Target) (operator.Measure, error) {
+	return operator.Measure{}, performer.fail
+}
+
+func (performer performer) Images(context.Context) (operator.Images, error) {
+	return operator.Images{}, performer.fail
+}
+
+func (performer performer) Boot(context.Context, operator.Image) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Pause(context.Context, operator.Target) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Resume(context.Context, operator.Target) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
 func (performer performer) Tap(context.Context, operator.Contact) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Swipe(context.Context, operator.Drag) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Pinch(context.Context, operator.Squeeze) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Press(context.Context, operator.Key) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Type(context.Context, operator.Entry) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Clear(context.Context, operator.Target) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Back(context.Context, operator.Target) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Home(context.Context, operator.Target) (operator.Ack, error) {
+	return operator.Ack{}, performer.fail
+}
+
+func (performer performer) Locate(context.Context, operator.Fix) (operator.Ack, error) {
 	return operator.Ack{}, performer.fail
 }
 

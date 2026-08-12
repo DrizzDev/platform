@@ -6,10 +6,6 @@ import (
 
 	"github.com/DrizzDev/platform/internal/capability/domain/catalog"
 	"github.com/DrizzDev/platform/internal/capability/domain/outcome"
-	"github.com/DrizzDev/platform/internal/capture/application/recording"
-	"github.com/DrizzDev/platform/internal/capture/domain/category"
-	"github.com/DrizzDev/platform/internal/capture/domain/fidelity"
-	"github.com/DrizzDev/platform/internal/capture/domain/origin"
 	"github.com/DrizzDev/platform/internal/device/domain/point"
 	"github.com/DrizzDev/platform/internal/device/domain/touch"
 )
@@ -35,12 +31,7 @@ func (operator Operator) Tap(scope context.Context, contact Contact) (Ack, error
 	}
 	operator.inscribe(scope, entry{
 		capability: catalog.Tap,
-		note: recording.Note{
-			Origin:   origin.Capability,
-			Fidelity: fidelity.Exact,
-			Category: category.Tool,
-			Payload:  []byte(fmt.Sprintf("tap %d,%d", contact.X, contact.Y)),
-		},
+		note:       operator.action(fmt.Sprintf("tap %d,%d", contact.X, contact.Y)),
 	})
 	return Ack{}, nil
 }

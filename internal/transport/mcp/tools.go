@@ -65,6 +65,12 @@ func (server Server) register(perform Perform) {
 			}
 			return server.done("Tapped."), nil, nil
 		})
+
+	server.interactions(perform)
+	server.observations(perform)
+	server.applications(perform)
+	server.inspections(perform)
+	server.emulators(perform)
 }
 
 // done renders a performed action that returns no data of its own as a short confirmation the agent can read.

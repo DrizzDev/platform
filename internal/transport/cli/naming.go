@@ -9,10 +9,14 @@ import (
 // command line and the agent connection name the same capability consistently from the one catalogue. TakeScreenshot
 // becomes take-screenshot.
 func (Command) slug(title string) string {
+	runes := []rune(title)
 	var builder strings.Builder
-	for index, letter := range title {
+	for index, letter := range runes {
 		if index > 0 && unicode.IsUpper(letter) {
-			builder.WriteRune('-')
+			following := index+1 < len(runes) && unicode.IsLower(runes[index+1])
+			if unicode.IsLower(runes[index-1]) || following {
+				builder.WriteRune('-')
+			}
 		}
 		builder.WriteRune(unicode.ToLower(letter))
 	}

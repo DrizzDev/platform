@@ -47,12 +47,204 @@ func (pilot pilot) Devices(scope context.Context) (operator.Roster, error) {
 	return engine.Devices(scope)
 }
 
+func (pilot pilot) Snapshot(scope context.Context, target operator.Target) (operator.Snapshot, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Snapshot{}, failure
+	}
+	return engine.Snapshot(scope, target)
+}
+
+func (pilot pilot) Hierarchy(scope context.Context, target operator.Target) (operator.Tree, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Tree{}, failure
+	}
+	return engine.Hierarchy(scope, target)
+}
+
+func (pilot pilot) Dimensions(scope context.Context, target operator.Target) (operator.Extent, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Extent{}, failure
+	}
+	return engine.Dimensions(scope, target)
+}
+
 func (pilot pilot) Tap(scope context.Context, contact operator.Contact) (operator.Ack, error) {
 	engine, failure := pilot.station.operate(scope)
 	if failure != nil {
 		return operator.Ack{}, failure
 	}
 	return engine.Tap(scope, contact)
+}
+
+func (pilot pilot) Install(scope context.Context, target operator.Package) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Install(scope, target)
+}
+
+func (pilot pilot) Launch(scope context.Context, target operator.Application) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Launch(scope, target)
+}
+
+func (pilot pilot) Terminate(scope context.Context, target operator.Application) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Terminate(scope, target)
+}
+
+func (pilot pilot) Wipe(scope context.Context, target operator.Application) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Wipe(scope, target)
+}
+
+func (pilot pilot) Installed(scope context.Context, target operator.Target) (operator.Listing, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Listing{}, failure
+	}
+	return engine.Installed(scope, target)
+}
+
+func (pilot pilot) Running(scope context.Context, target operator.Target) (operator.Listing, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Listing{}, failure
+	}
+	return engine.Running(scope, target)
+}
+
+func (pilot pilot) Foreground(scope context.Context, target operator.Target) (operator.Report, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Report{}, failure
+	}
+	return engine.Foreground(scope, target)
+}
+
+func (pilot pilot) Url(scope context.Context, target operator.Target) (operator.Report, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Report{}, failure
+	}
+	return engine.Url(scope, target)
+}
+
+func (pilot pilot) Disk(scope context.Context, target operator.Target) (operator.Measure, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Measure{}, failure
+	}
+	return engine.Disk(scope, target)
+}
+
+func (pilot pilot) Images(scope context.Context) (operator.Images, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Images{}, failure
+	}
+	return engine.Images(scope)
+}
+
+func (pilot pilot) Boot(scope context.Context, target operator.Image) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Boot(scope, target)
+}
+
+func (pilot pilot) Pause(scope context.Context, target operator.Target) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Pause(scope, target)
+}
+
+func (pilot pilot) Resume(scope context.Context, target operator.Target) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Resume(scope, target)
+}
+
+func (pilot pilot) Swipe(scope context.Context, drag operator.Drag) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Swipe(scope, drag)
+}
+
+func (pilot pilot) Pinch(scope context.Context, squeeze operator.Squeeze) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Pinch(scope, squeeze)
+}
+
+func (pilot pilot) Press(scope context.Context, key operator.Key) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Press(scope, key)
+}
+
+func (pilot pilot) Type(scope context.Context, input operator.Entry) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Type(scope, input)
+}
+
+func (pilot pilot) Clear(scope context.Context, target operator.Target) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Clear(scope, target)
+}
+
+func (pilot pilot) Back(scope context.Context, target operator.Target) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Back(scope, target)
+}
+
+func (pilot pilot) Home(scope context.Context, target operator.Target) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Home(scope, target)
+}
+
+func (pilot pilot) Locate(scope context.Context, fix operator.Fix) (operator.Ack, error) {
+	engine, failure := pilot.station.operate(scope)
+	if failure != nil {
+		return operator.Ack{}, failure
+	}
+	return engine.Locate(scope, fix)
 }
 
 // station assembles the device runtime once and holds it for reuse. Assembly is single-flight; its result — the

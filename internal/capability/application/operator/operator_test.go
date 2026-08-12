@@ -21,12 +21,21 @@ import (
 	"github.com/DrizzDev/platform/internal/capture/infrastructure/artifact"
 	"github.com/DrizzDev/platform/internal/capture/infrastructure/sqlite"
 	"github.com/DrizzDev/platform/internal/device/application/control"
+	"github.com/DrizzDev/platform/internal/device/domain/app"
+	"github.com/DrizzDev/platform/internal/device/domain/bundle"
 	"github.com/DrizzDev/platform/internal/device/domain/capture"
 	"github.com/DrizzDev/platform/internal/device/domain/device"
+	"github.com/DrizzDev/platform/internal/device/domain/emulator"
 	"github.com/DrizzDev/platform/internal/device/domain/format"
+	"github.com/DrizzDev/platform/internal/device/domain/geo"
 	"github.com/DrizzDev/platform/internal/device/domain/image"
+	"github.com/DrizzDev/platform/internal/device/domain/parcel"
+	"github.com/DrizzDev/platform/internal/device/domain/pinch"
 	"github.com/DrizzDev/platform/internal/device/domain/platform"
+	"github.com/DrizzDev/platform/internal/device/domain/press"
 	"github.com/DrizzDev/platform/internal/device/domain/serial"
+	"github.com/DrizzDev/platform/internal/device/domain/swipe"
+	"github.com/DrizzDev/platform/internal/device/domain/text"
 	"github.com/DrizzDev/platform/internal/device/domain/touch"
 )
 
@@ -41,7 +50,71 @@ func (bridge bridge) Screenshot(context.Context, device.Device) (capture.Capture
 	return bridge.frame, nil
 }
 
+func (bridge bridge) Snapshot(context.Context, device.Device) (capture.Capture, string, error) {
+	return bridge.frame, "<hierarchy/>", nil
+}
+
+func (bridge bridge) Hierarchy(context.Context, device.Device) (string, error) {
+	return "<hierarchy/>", nil
+}
+
+func (bridge bridge) Dimensions(context.Context, device.Device) (int, int, error) {
+	return 1080, 2400, nil
+}
+
 func (bridge bridge) Tap(context.Context, touch.Touch) error { return nil }
+
+func (bridge bridge) Swipe(context.Context, swipe.Swipe) error { return nil }
+
+func (bridge bridge) Pinch(context.Context, pinch.Pinch) error { return nil }
+
+func (bridge bridge) Press(context.Context, press.Press) error { return nil }
+
+func (bridge bridge) Type(context.Context, text.Text) error { return nil }
+
+func (bridge bridge) Clear(context.Context, device.Device) error { return nil }
+
+func (bridge bridge) Back(context.Context, device.Device) error { return nil }
+
+func (bridge bridge) Home(context.Context, device.Device) error { return nil }
+
+func (bridge bridge) Locate(context.Context, geo.Fix) error { return nil }
+
+func (bridge bridge) Install(context.Context, parcel.Parcel) error { return nil }
+
+func (bridge bridge) Launch(context.Context, bundle.Bundle) error { return nil }
+
+func (bridge bridge) Terminate(context.Context, bundle.Bundle) error { return nil }
+
+func (bridge bridge) Wipe(context.Context, bundle.Bundle) error { return nil }
+
+func (bridge bridge) Installed(context.Context, device.Device) ([]app.App, error) {
+	return []app.App{app.New(app.Input{Id: "com.example", Name: "Example", Note: "1.0"})}, nil
+}
+
+func (bridge bridge) Running(context.Context, device.Device) ([]app.App, error) {
+	return []app.App{app.New(app.Input{Id: "com.example", Name: "Example", Note: "123"})}, nil
+}
+
+func (bridge bridge) Foreground(context.Context, device.Device) (string, error) {
+	return "com.example", nil
+}
+
+func (bridge bridge) Url(context.Context, device.Device) (string, error) {
+	return "https://example.com", nil
+}
+
+func (bridge bridge) Disk(context.Context, device.Device) (int, error) { return 4096, nil }
+
+func (bridge bridge) Images(context.Context, platform.Platform) ([]string, error) {
+	return []string{"Pixel_7_API_34"}, nil
+}
+
+func (bridge bridge) Boot(context.Context, emulator.Boot) error { return nil }
+
+func (bridge bridge) Pause(context.Context, device.Device) error { return nil }
+
+func (bridge bridge) Resume(context.Context, device.Device) error { return nil }
 
 func (bridge bridge) List(context.Context) ([]device.Device, error) {
 	return bridge.devices, nil
