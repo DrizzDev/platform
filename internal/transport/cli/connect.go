@@ -166,6 +166,9 @@ func (command Command) summarize(outcome connect.Outcome) string {
 	if outcome.Detail() != "" {
 		line += " (" + outcome.Detail() + ")"
 	}
+	if outcome.Note() != "" {
+		line += " — " + outcome.Note()
+	}
 	if outcome.Restart() && command.changed(outcome.State()) {
 		line += " — restart " + outcome.Title() + " to apply"
 	}
