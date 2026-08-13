@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -31,6 +32,9 @@ type desk struct {
 	disconnects int
 	captures    int
 	uncaptures  int
+	commands    int
+	uncommands  int
+	conflict    bool
 }
 
 func (desk *desk) Detect(target agent.Agent) (bool, error) {
@@ -74,6 +78,22 @@ func (desk *desk) Uncapture(context.Context, agent.Agent) error {
 		return desk.fault
 	}
 	desk.uncaptures++
+	return nil
+}
+
+func (desk *desk) Command(context.Context, connect.Task) (bool, error) {
+	if desk.fault != nil {
+		return false, desk.fault
+	}
+	desk.commands++
+	return desk.conflict, nil
+}
+
+func (desk *desk) Uncommand(context.Context, agent.Agent) error {
+	if desk.fault != nil {
+		return desk.fault
+	}
+	desk.uncommands++
 	return nil
 }
 
@@ -151,6 +171,17 @@ func (kit kit) state(ask query) connect.State {
 	for _, outcome := range ask.report.Outcomes() {
 		if outcome.Kind() == ask.kind {
 			return outcome.State()
+		}
+	}
+	kit.test.Fatalf("no outcome for agent %q", ask.kind)
+	return ""
+}
+
+func (kit kit) note(ask query) string {
+	kit.test.Helper()
+	for _, outcome := range ask.report.Outcomes() {
+		if outcome.Kind() == ask.kind {
+			return outcome.Note()
 		}
 	}
 	kit.test.Fatalf("no outcome for agent %q", ask.kind)
@@ -266,5 +297,41 @@ func TestSurveyReportsStatus(test *testing.T) {
 	}
 	if got := kit.state(query{report: report, kind: "gemini"}); got != connect.Missing {
 		test.Fatalf("gemini = %s, want MISSING", got)
+	}
+}
+
+func TestEnableInstallsCommand(test *testing.T) {
+	test.Parallel()
+	station := &desk{present: map[agent.Kind]bool{"claude-code": true}}
+	kit := kit{test: test}
+	installer, _ := kit.build(setup{station: station, resolver: pin{path: "/opt/drizz"}})
+
+	report, failure := installer.Enable(context.Background(), connect.Selection{Kind: "claude-code"})
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if station.commands != 1 {
+		test.Fatalf("installed %d commands, want 1", station.commands)
+	}
+	if note := kit.note(query{report: report, kind: "claude-code"}); note != "" {
+		test.Fatalf("a clean install carried a note: %q", note)
+	}
+}
+
+func TestEnableKeepsForeignCommand(test *testing.T) {
+	test.Parallel()
+	station := &desk{present: map[agent.Kind]bool{"claude-code": true}, conflict: true}
+	kit := kit{test: test}
+	installer, _ := kit.build(setup{station: station, resolver: pin{path: "/opt/drizz"}})
+
+	report, failure := installer.Enable(context.Background(), connect.Selection{Kind: "claude-code"})
+	if failure != nil {
+		test.Fatal(failure)
+	}
+	if got := kit.state(query{report: report, kind: "claude-code"}); got != connect.Connected {
+		test.Fatalf("claude-code = %s, want CONNECTED despite the command conflict", got)
+	}
+	if note := kit.note(query{report: report, kind: "claude-code"}); !strings.Contains(note, "kept your existing") {
+		test.Fatalf("conflict note = %q, want the kept-existing warning", note)
 	}
 }

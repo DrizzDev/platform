@@ -24,13 +24,16 @@ type resolver interface {
 
 // store reads and writes one agent application's configuration file. Detect reports whether the agent is present on
 // this machine; Wired reports whether Drizz is already registered; Connect merges the Drizz entry, preserving every
-// other setting, and confirms the write; Disconnect removes only the Drizz entry. Per-dialect adapters satisfy it, so
-// the flow never knows whether a file is JSON or TOML.
+// other setting, and confirms the write; Disconnect removes only the Drizz entry. Command installs the Drizz `/author`
+// command, reporting a conflict when the person already owns a command Drizz does not; Uncommand removes only the Drizz
+// command. Per-dialect adapters satisfy it, so the flow never knows whether a file is JSON or TOML.
 type store interface {
 	Detect(agent.Agent) (bool, error)
 	Wired(agent.Agent) (bool, error)
 	Connect(context.Context, Task) error
 	Disconnect(context.Context, agent.Agent) error
+	Command(context.Context, Task) (bool, error)
+	Uncommand(context.Context, agent.Agent) error
 	Captures(agent.Agent) (bool, error)
 	Capture(context.Context, Task) error
 	Uncapture(context.Context, agent.Agent) error

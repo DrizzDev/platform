@@ -13,6 +13,7 @@ var catalogue = []Agent{
 		dialect:    Json,
 		typed:      true,
 		restart:    false,
+		commanding: Commanding{base: Home, segments: []string{".claude", "commands", "author.md"}},
 		hooking: Hooking{
 			base:     Home,
 			segments: []string{".claude", "settings.json"},

@@ -20,6 +20,7 @@ type Agent struct {
 	collection string
 	dialect    Dialect
 	hooking    Hooking
+	commanding Commanding
 	typed      bool
 	restart    bool
 }
@@ -56,6 +57,12 @@ func (agent Agent) Dialect() Dialect {
 // hook mechanism at all.
 func (agent Agent) Hooking() Hooking {
 	return agent.hooking
+}
+
+// Commanding describes where this agent keeps its user-invocable commands, so the installer can place the Drizz
+// command file. An agent with no command surface leaves it unset.
+func (agent Agent) Commanding() Commanding {
+	return agent.commanding
 }
 
 // Typed reports whether the agent's stdio server entry must carry an explicit "type" of "stdio". Claude Code requires

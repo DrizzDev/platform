@@ -44,6 +44,7 @@ type Outcome struct {
 	title     string
 	state     State
 	detail    string
+	note      string
 	restart   bool
 	capturing bool
 }
@@ -71,6 +72,12 @@ func (outcome Outcome) Capturing() bool {
 
 func (outcome Outcome) Detail() string {
 	return outcome.detail
+}
+
+// Note is a short, safe advisory for a change that otherwise succeeded — for example, that the person's own /author
+// command was kept in place of Drizz's.
+func (outcome Outcome) Note() string {
+	return outcome.note
 }
 
 // Report is the per-agent result of one installer operation.

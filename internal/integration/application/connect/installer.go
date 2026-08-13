@@ -122,7 +122,21 @@ func (installer Installer) wire(scope context.Context, job Task) Outcome {
 	if wired {
 		state = Updated
 	}
-	return Outcome{kind: job.Agent.Kind(), title: job.Agent.Title(), state: state, restart: job.Agent.Restart()}
+	return Outcome{kind: job.Agent.Kind(), title: job.Agent.Title(), state: state, note: installer.command(scope, job), restart: job.Agent.Restart()}
+}
+
+// command installs the /author command for the agent and returns a short note when the person's own command was kept, or
+// when the command could not be written. Installing the command never fails the connection it accompanies.
+func (installer Installer) command(scope context.Context, job Task) string {
+	conflict, failure := installer.store.Command(scope, job)
+	if failure != nil {
+		installer.logger.WarnContext(scope, "integration.command.failed", slog.String("agent", job.Agent.Kind().String()))
+		return "the /author command could not be written"
+	}
+	if conflict {
+		return "kept your existing /author command; Drizz's authoring command was not installed"
+	}
+	return ""
 }
 
 func (installer Installer) unwire(scope context.Context, target agent.Agent) Outcome {
@@ -132,6 +146,9 @@ func (installer Installer) unwire(scope context.Context, target agent.Agent) Out
 	}
 	if failure := installer.store.Disconnect(scope, target); failure != nil {
 		return Outcome{kind: target.Kind(), title: target.Title(), state: installer.grade(failure), detail: installer.detail(failure)}
+	}
+	if failure := installer.store.Uncommand(scope, target); failure != nil {
+		installer.logger.WarnContext(scope, "integration.uncommand.failed", slog.String("agent", target.Kind().String()))
 	}
 	installer.inscribe(scope, mark{kind: target.Kind(), action: "disconnected"})
 	return Outcome{kind: target.Kind(), title: target.Title(), state: Removed, restart: target.Restart()}
