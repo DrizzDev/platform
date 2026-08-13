@@ -8,6 +8,18 @@ Author a Drizz test for this goal:
 
 > $ARGUMENTS
 
+## Narrate the run in plain English
+
+Make the run readable to someone non-technical watching along. As you go, print short, natural sentences that say what
+you are doing and what you see — a running commentary, **with no labels or prefixes** (never write "Before:", "After:",
+or "Step:"). For each action, note briefly what you are about to do, and once it lands, what is now on screen.
+
+For example: "Opening the Calculator." · "Tapping 6, then ×, then 7." · "The result shows 42." · "Searching for Puma
+running shoes." · "Results loaded — opening the first one." · "The item is now in the bag."
+
+Keep it human and jargon-free: no tool names, no coordinates, no internal codes, no "calling …". This narration is for
+the live run; the saved test itself stays terse per the rules below.
+
 ## Run it fresh, every time
 
 **Perform this flow now on the connected device** with the Drizz tools (tap, type, swipe, screenshot / snapshot),
