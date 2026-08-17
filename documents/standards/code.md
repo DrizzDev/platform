@@ -5,7 +5,7 @@ Status: Approved and mandatory
 The mandatory structure and naming policy is defined in [style.md](style.md). Language profiles may add syntax rules but may not weaken it.
 
 - `CODE-001`: Names MUST follow the strict single-word and domain-vocabulary rules in `STYLE-001` through `STYLE-015`.
-- `CODE-002`: Multiword concepts MUST use the nested structure required by `STYLE-003`, `STYLE-004`, and `STYLE-011`.
+- `CODE-002`: Multi-word concepts MUST use the nested structure required by `STYLE-003`, `STYLE-004`, and `STYLE-011`.
 - `CODE-003`: Generic names such as `base`, `common`, `helper`, `manager`, `misc`, `processor`, `service`, `types`, `util`, and `wrapper` are prohibited unless the word is the exact domain or platform concept.
 - `CODE-004`: `Impl` is prohibited. Concrete names MUST identify the strategy or provider.
 - `CODE-005`: Established initialisms retain language-idiomatic casing.
