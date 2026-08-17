@@ -27,6 +27,9 @@ go.work.sum
 # Env file
 .env
 
+# Generated software bill of materials (regenerate with `make sbom`)
+sbom.cdx.json
+
 .artifacts/
 
 bin/

@@ -29,3 +29,4 @@ approved ADR.
 - [ ] Focused tests cover behavior and failure.
 - [ ] `make verify` passes.
 - [ ] I reviewed the fresh complete diff against the design inventory.
+- [ ] Every commit is signed off (`git commit -s`; see CONTRIBUTING.md and DCO).
