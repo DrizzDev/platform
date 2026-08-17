@@ -96,7 +96,7 @@ make build        # build the program
 make verify       # run the full check suite (format, lint, tests, race, cross-build, and more)
 ```
 
-A release compiles the device helper for every supported target, carries it inside the program, and publishes the signed archives, checksums, Homebrew cask, and shell installer. See the [packaging plan](documents/plans/packaging.md) for the full process.
+A release compiles the device helper for every supported target, carries it inside the program, and publishes the signed archives, checksums, Homebrew cask, and shell installer.
 
 ## Security
 
@@ -104,4 +104,4 @@ Drizz is local-first by design. It signs you in through the system browser using
 
 ## License
 
-See the repository for license details.
+Drizz is licensed under the Business Source License 1.1, converting to the Apache License 2.0 on 2030-08-15. See [LICENSE](LICENSE).

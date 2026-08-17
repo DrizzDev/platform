@@ -26,7 +26,7 @@ Status: Approved and mandatory
 - `REL-014`: Validation, authorization, integrity, and incompatible-schema failures MUST NOT be blindly retried.
 - `REL-015`: Lost acknowledgements MUST reconcile remote state before resending large or nontrivial bodies.
 - `REL-016`: Partial success MUST remain partial and be recoverable per item.
-- `REL-017`: Backpressure MUST produce a typed, observable outcome and MUST NOT silently discard durable work.
+- `REL-017`: Back-pressure MUST produce a typed, observable outcome and MUST NOT silently discard durable work.
 
 ## Storage and artifacts
 

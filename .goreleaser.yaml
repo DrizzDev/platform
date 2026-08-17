@@ -13,6 +13,9 @@ builds:
     binary: drizz
     env: [CGO_ENABLED=0]
     flags: [-trimpath]
+    ldflags:
+      - -s -w
+      - -X github.com/DrizzDev/platform/internal/platform/build.stamped={{ .Tag }}
     goos: [linux, darwin, windows]
     goarch: [amd64, arm64]
     hooks:
@@ -20,6 +23,7 @@ builds:
         - cmd: scripts/embed {{ .Os }} {{ .Arch }} {{ envOrDefault "DRIZZ_HELPER_DIST" "../device-bridge/dist/helper" }}
       post:
         - cmd: scripts/placeholder
+        - cmd: scripts/sign {{ .Path }} {{ .Os }}
 
 archives:
   - id: drizz
@@ -40,6 +44,7 @@ homebrew_casks:
   - name: drizz
     ids: [drizz]
     binaries: [drizz]
+    skip_upload: "auto"
     repository:
       owner: DrizzDev
       name: homebrew-tap

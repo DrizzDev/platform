@@ -85,7 +85,7 @@ func (command Command) enable(scope context.Context) *cobra.Command {
 		Use:   "enable [agent]",
 		Short: "Connect Drizz to one agent, or every detected agent, and record context unless --no-capture",
 		Args:  cobra.MaximumNArgs(1),
-		RunE: func(_ *cobra.Command, arguments []string) error {
+		RunE: func(root *cobra.Command, arguments []string) error {
 			selection := command.selection(arguments)
 			report, failure := command.options.Connect.Enable(scope, selection)
 			if failure != nil {
@@ -96,6 +96,9 @@ func (command Command) enable(scope context.Context) *cobra.Command {
 			}
 			if plain {
 				return nil
+			}
+			if failure := command.disclose(root); failure != nil {
+				return failure
 			}
 			capture, failure := command.options.Connect.Capture(scope, selection)
 			if failure != nil {
@@ -137,6 +140,12 @@ func (command Command) consented(root *cobra.Command) bool {
 		root:     root,
 		question: "Let Drizz record your prompts and responses for context? This captures what you type. [y/N]: ",
 	})
+}
+
+func (command Command) disclose(root *cobra.Command) error {
+	_, failure := fmt.Fprintln(root.OutOrStdout(),
+		"Recording your prompts and responses for context. Turn this off with --no-capture, or later with `drizz connect uncapture`.")
+	return failure
 }
 
 func (Command) confirm(ask prompting) bool {

@@ -3,7 +3,7 @@
 # and place it on PATH. Intended for: curl -fsSL https://get.drizz.dev | sh
 set -eu
 
-repo="DrizzDev/platform"
+repo="DrizzDev/releases"
 dest="${DRIZZ_INSTALL:-$HOME/.local/bin}"
 
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"

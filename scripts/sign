@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+# Codesign and notarize a built binary when signing is enabled; a no-op for non-macOS targets or when disabled.
+set -eu
+
+binary="$1"
+platform="$2"
+
+[ "${DRIZZ_SIGN:-false}" = "true" ] || exit 0
+[ "$platform" = "darwin" ] || exit 0
+
+codesign --force --options runtime --timestamp --sign "$CSC_NAME" "$binary"
+
+archive="$(mktemp -d)/bundle.zip"
+/usr/bin/ditto -c -k "$binary" "$archive"
+xcrun notarytool submit "$archive" \
+	--apple-id "$APPLE_ID" \
+	--password "$APPLE_APP_SPECIFIC_PASSWORD" \
+	--team-id "$APPLE_TEAM_ID" \
+	--wait
+rm -f "$archive"
