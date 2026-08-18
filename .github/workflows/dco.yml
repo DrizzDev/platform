@@ -24,6 +24,9 @@ jobs:
           missing=0
           for commit in $(git rev-list "$BASE".."$HEAD"); do
             author="$(git show -s --format='%an <%ae>' "$commit")"
+            case "$author" in
+              *"[bot]"*) echo "skipping automated commit $commit by $author"; continue ;;
+            esac
             if git show -s --format='%B' "$commit" | grep -qiE "^Signed-off-by: .+ <.+@.+>$"; then
               continue
             fi
