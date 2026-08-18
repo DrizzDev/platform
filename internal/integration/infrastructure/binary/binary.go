@@ -2,27 +2,24 @@
 // configuration launches exactly this installed binary rather than whatever a lookup on the search path might find.
 package binary
 
-import (
-	"os"
-	"path/filepath"
-)
+import "os"
 
 // Resolver reports the running executable's path.
-type Resolver struct{}
-
-func New() Resolver {
-	return Resolver{}
+type Resolver struct {
+	executable func() (string, error)
 }
 
-// Locate returns the absolute, symlink-resolved path of the running executable. If the symlink cannot be resolved the
-// raw path is returned, since a launchable path is better than none.
-func (Resolver) Locate() (string, error) {
-	path, failure := os.Executable()
-	if failure != nil {
-		return "", failure
+func New() Resolver {
+	return Resolver{executable: os.Executable}
+}
+
+// Locate returns the path of the running executable as it was invoked. It deliberately does not resolve symlinks: a
+// package manager such as Homebrew installs a stable launcher symlink and a version-pinned target, and the entry the
+// installer writes must point at the launcher so it keeps working after an upgrade replaces the target.
+func (resolver Resolver) Locate() (string, error) {
+	locate := resolver.executable
+	if locate == nil {
+		locate = os.Executable
 	}
-	if resolved, broken := filepath.EvalSymlinks(path); broken == nil {
-		return resolved, nil
-	}
-	return path, nil
+	return locate()
 }
