@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Regenerate THIRD_PARTY_NOTICES.md: every runtime dependency, its version, and its license.
+
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+output="${1:-${root}/THIRD_PARTY_NOTICES.md}"
+cd "${root}"
+
+classify() {
+	local file="$1"
+	if grep -Eiq 'Apache License' "${file}"; then echo "Apache-2.0"; return; fi
+	if grep -Eiq 'Mozilla Public License,? version 2\.0' "${file}"; then echo "MPL-2.0"; return; fi
+	if grep -Eiq 'Redistribution and use in source and binary forms' "${file}"; then echo "BSD"; return; fi
+	if grep -Eiq 'Permission to use, copy, modify, and/or distribute this software' "${file}"; then echo "ISC"; return; fi
+	if grep -Eiq 'dual-licensed under the Unlicense and MIT' "${file}"; then echo "Unlicense/MIT"; return; fi
+	if grep -Eiq 'Permission is hereby granted, free of charge' "${file}"; then echo "MIT"; return; fi
+	echo "UNKNOWN"
+}
+
+inventory="$(mktemp "${TMPDIR:-/tmp}/drizz-notices.XXXXXX")"
+trap 'rm -f "${inventory}"' EXIT
+
+go list -deps -f '{{with .Module}}{{if not .Main}}{{.Path}}|{{.Version}}|{{.Dir}}{{end}}{{end}}' ./... \
+	| LC_ALL=C sort -u > "${inventory}"
+
+{
+	echo "# Third-party notices"
+	echo
+	echo "Drizz links the following third-party Go modules at runtime. Each is used"
+	echo "under the license shown, found in the module's source. Regenerate this file"
+	echo "with \`make notices\`."
+	echo
+	echo "| Module | Version | License |"
+	echo "| --- | --- | --- |"
+	while IFS='|' read -r module module_version directory; do
+		[ -z "${module}" ] && continue
+		license="$(find "${directory}" -maxdepth 1 -type f \( -iname 'license*' -o -iname 'licence*' -o -iname 'copying*' \) -print -quit)"
+		if [ -z "${license}" ]; then
+			kind="UNKNOWN"
+		else
+			kind="$(classify "${license}")"
+		fi
+		echo "| \`${module}\` | ${module_version} | ${kind} |"
+	done < "${inventory}"
+} > "${output}"
+
+echo "notices: wrote ${output}"

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Generate a CycloneDX software bill of materials for the module into sbom.cdx.json.
+
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+version="v1.9.0"
+output="${1:-${root}/sbom.cdx.json}"
+
+cd "${root}"
+go run "github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@${version}" \
+	app -licenses -json -main command/drizz -output "${output}"
+
+echo "sbom: wrote ${output}"

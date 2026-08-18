@@ -1,4 +1,4 @@
-.PHONY: build crossbuild release hygiene format fix module vet staticcheck lint architecture test race vulnerability license secret smoke hook prepush verify
+.PHONY: build crossbuild release hygiene format fix module vet staticcheck lint architecture test race vulnerability license secret smoke notices sbom hook prepush verify
 
 build:
 	go build -trimpath ./...
@@ -53,6 +53,12 @@ secret:
 
 license:
 	scripts/license
+
+notices:
+	scripts/notices
+
+sbom:
+	scripts/sbom
 
 smoke:
 	scripts/smoke
