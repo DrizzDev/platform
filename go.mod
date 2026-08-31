@@ -6,8 +6,8 @@ toolchain go1.26.6
 
 require (
 	github.com/coreos/go-oidc/v3 v3.20.0
-	github.com/getsentry/sentry-go v0.48.0
-	github.com/getsentry/sentry-go/otel v0.48.0
+	github.com/getsentry/sentry-go v0.49.0
+	github.com/getsentry/sentry-go/otel v0.49.0
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/modelcontextprotocol/go-sdk v1.7.0
 	github.com/pelletier/go-toml/v2 v2.3.1
